@@ -1,0 +1,228 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
+using ASCOM.Utilities;
+using ASCOM.SonyMirrorless;
+using System.Collections;
+
+namespace ASCOM.SonyMirrorless
+{
+    [ComVisible(false)]					// Form not registered for COM!
+    public partial class SetupDialogForm : Form
+    {
+        public SetupDialogForm()
+        {
+            InitializeComponent();
+            // Initialise current values of user settings from the ASCOM Profile
+            InitUI();
+        }
+
+        private void cmdOK_Click(object sender, EventArgs e) // OK button event handler
+        {
+            // Place any validation constraint checks here
+            // Update the state variables with results from the dialogue
+            Camera.deviceId = (string)comboBoxCamera.SelectedItem;
+            Camera.tl.Enabled = chkTrace.Checked;
+            Camera.defaultReadoutMode = (short)comboBoxOutputFormat.SelectedValue;
+            Camera.SaveRawImageData = checkBoxEnableSaveLocation.Checked;
+            Camera.SaveRawImageFolder = textBoxSaveLocation.Text;
+            Camera.UseLiveview = checkBoxUseLiveview.Checked;
+            Camera.Personality = (int)comboBoxPersonality.SelectedValue;
+        }
+
+        private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
+        {
+            Close();
+        }
+
+        private void BrowseToAscom(object sender, EventArgs e) // Click on ASCOM logo event handler
+        {
+            try
+            {
+                System.Diagnostics.Process.Start("http://ascom-standards.org/");
+            }
+            catch (System.ComponentModel.Win32Exception noBrowser)
+            {
+                if (noBrowser.ErrorCode == -2147467259)
+                    MessageBox.Show(noBrowser.Message);
+            }
+            catch (System.Exception other)
+            {
+                MessageBox.Show(other.Message);
+            }
+        }
+
+        private void InitUI()
+        {
+            chkTrace.Checked = Camera.tl.Enabled;
+            SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
+            String selected = "";
+
+            comboBoxCamera.Items.Clear();
+
+            foreach (SonyCamera candidate in enumerator.Cameras)
+            {
+                comboBoxCamera.Items.Add(candidate.DisplayName);
+
+                if (candidate.DisplayName == Camera.deviceId)
+                {
+                    selected = candidate.DisplayName;
+                }
+            }
+
+            if (selected.Length > 0)
+            {
+                comboBoxCamera.SelectedItem = selected;
+            }
+
+            checkBoxEnableSaveLocation.Checked = Camera.SaveRawImageData;
+            textBoxSaveLocation.Enabled = Camera.SaveRawImageData;
+            textBoxSaveLocation.Text = Camera.SaveRawImageFolder;
+            buttonSelectFolder.Enabled = Camera.SaveRawImageData;
+            checkBoxUseLiveview.Checked = Camera.UseLiveview;
+
+            Dictionary<int, string> personalities = new Dictionary<int, string>();
+
+            personalities.Add(SonyCommon.PERSONALITY_APT, "APT");
+            personalities.Add(SonyCommon.PERSONALITY_NINA, "N.I.N.A");
+            personalities.Add(SonyCommon.PERSONALITY_SHARPCAP, "SharpCap");
+
+            comboBoxPersonality.DataSource = new BindingSource(personalities, null);
+            comboBoxPersonality.DisplayMember = "Value";
+            comboBoxPersonality.ValueMember = "Key";
+
+            comboBoxPersonality.SelectedValue = Camera.Personality;
+
+            PopulateOutputFormats();
+
+            comboBoxOutputFormat.SelectedValue = Camera.defaultReadoutMode;
+
+            timer1.Tick += showCameraStatus;
+            timer1.Start();
+        }
+
+        private void showCameraStatus(Object o, EventArgs eventArgs)
+        {
+            SonyCamera camera = Camera.camera;
+
+            if (camera != null)
+            {
+                textBoxCameraConnected.Text = camera.Connected ? "Connected" : "Disconnected";
+
+                if (camera.Connected)
+                {
+                    camera.RefreshProperties();
+                    textBoxCameraMode.Text = camera.GetPropertyValue(0x500e).Text;
+                    textBoxCameraCompressionMode.Text = camera.GetPropertyValue(0x5004).Text;
+                    textBoxCameraExposureTime.Text = camera.GetPropertyValue(0xd20d).Text;
+                    textBoxCameraISO.Text = camera.GetPropertyValue(0xd21e).Text;
+                    textBoxCameraBatteryLevel.Text = camera.GetPropertyValue(0xd218).Text;
+                }
+                else
+                {
+                    textBoxCameraMode.Text = "-";
+                    textBoxCameraCompressionMode.Text = "-";
+                    textBoxCameraExposureTime.Text = "-";
+                    textBoxCameraISO.Text = "-";
+                    textBoxCameraBatteryLevel.Text = "-";
+                }
+            }
+            else
+            {
+                textBoxCameraConnected.Text = "Not Initialized";
+            }
+        }
+
+        private void checkBoxEnableSaveLocation_CheckedChanged(object sender, EventArgs e)
+        {
+            textBoxSaveLocation.Enabled = ((CheckBox)sender).Checked;
+            buttonSelectFolder.Enabled = ((CheckBox)sender).Checked;
+        }
+
+        private void selectFolder_Click(object sender, EventArgs e)
+        {
+            selectFolderDialog.SelectedPath = textBoxSaveLocation.Text;
+
+            if (selectFolderDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBoxSaveLocation.Text = selectFolderDialog.SelectedPath;
+            }
+        }
+
+        private void comboBoxPersonality_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int personality = (int)comboBoxPersonality.SelectedValue;
+
+            short currentOutputFormat = comboBoxOutputFormat.SelectedValue != null ? (short)comboBoxOutputFormat.SelectedValue : SonyCommon.OUTPUTFORMAT_RGGB;
+
+            switch (personality)
+            {
+                case SonyCommon.PERSONALITY_APT:
+                    // APT allows image output to be selected (though BGR will give interesting results)
+                    // APT also supports RGB output so liveview can be enabled
+                    comboBoxOutputFormat.Enabled = true;
+                    checkBoxUseLiveview.Enabled = true;
+
+                    PopulateOutputFormats();
+
+                    comboBoxOutputFormat.SelectedValue = currentOutputFormat > 0 ? currentOutputFormat : SonyCommon.OUTPUTFORMAT_RGGB;
+                    break;
+
+                case SonyCommon.PERSONALITY_NINA:
+                    // NINA only supports RGGB, so we need to preset format and disable liveview
+                    PopulateOutputFormats();
+                    comboBoxOutputFormat.SelectedValue = SonyCommon.OUTPUTFORMAT_RGGB;
+                    comboBoxOutputFormat.Enabled = false;
+                    checkBoxUseLiveview.Enabled = false;
+                    checkBoxUseLiveview.Checked = false;
+                    break;
+
+                case SonyCommon.PERSONALITY_SHARPCAP:
+                    // Sharpcap supports format specification, but wants BGR, not RGB
+                    // Doesn't support Liveview selection
+                    comboBoxOutputFormat.Enabled = true;
+
+                    PopulateOutputFormats();
+
+                    if (currentOutputFormat == SonyCommon.OUTPUTFORMAT_RGB)
+                    {
+                        currentOutputFormat = SonyCommon.OUTPUTFORMAT_BGR;
+                    }
+
+                    comboBoxOutputFormat.SelectedValue = currentOutputFormat;
+                    checkBoxUseLiveview.Enabled = false;
+                    checkBoxUseLiveview.Checked = false;
+                    break;
+            }
+        }
+
+        private void PopulateOutputFormats()
+        {
+            Dictionary<short, string> outputFormats = new Dictionary<short, string>();
+
+            outputFormats.Add(SonyCommon.OUTPUTFORMAT_RGGB, "RAW/RGGB (Unprocessed)");
+
+            switch ((int)comboBoxPersonality.SelectedValue)
+            {
+                case SonyCommon.PERSONALITY_APT:
+                    outputFormats.Add(SonyCommon.OUTPUTFORMAT_RGB, "RGB (Processed)");
+                    break;
+
+                case SonyCommon.PERSONALITY_NINA:
+                    break;
+
+                case SonyCommon.PERSONALITY_SHARPCAP:
+                    outputFormats.Add(SonyCommon.OUTPUTFORMAT_BGR, "BGR (Processed)");
+                    break;
+            }
+
+            comboBoxOutputFormat.DataSource = new BindingSource(outputFormats, null);
+            comboBoxOutputFormat.DisplayMember = "Value";
+            comboBoxOutputFormat.ValueMember = "Key";
+        }
+    }
+}
