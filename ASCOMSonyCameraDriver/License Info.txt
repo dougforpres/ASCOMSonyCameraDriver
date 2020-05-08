@@ -1,9 +1,12 @@
 ﻿ASCOM Driver Template
 This work is licensed under the Creative Commons Attribution-No Derivative Works 3.0 License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nd/3.0/ or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 
-Sony Mirrorless Driver
+ASCOM Sony Mirrorless Driver
 (c) 2019-2020 by Doug Henderson
 License TBD
+
+Sony Mirrorless Driver DLL
+see https://github.com/dougforpres/SonyCamera/blob/master/LICENSE
 
 LibRaw
 This software is based in part on the work of LibRaw LLC

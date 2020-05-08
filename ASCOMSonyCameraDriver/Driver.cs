@@ -843,8 +843,15 @@ namespace ASCOM.SonyMirrorless
             {
                 CheckConnected("Camera must be connected to get NumX");
 
-                tl.LogMessage("NumX Get", camera.Mode.ImageWidthPixels.ToString());
-                return (int)Math.Min(cameraNumX, camera.Mode.ImageWidthPixels);
+                int x = (int)camera.Mode.ImageWidthPixels;
+
+                if (camera.ImageReady)
+                {
+                    x = camera.LastImage.Width;
+                }
+
+                tl.LogMessage("NumX Get", x.ToString());
+                return (int)Math.Min(cameraNumX, x);
             }
             set
             {
@@ -860,9 +867,15 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 CheckConnected("Camera must be connected to get NumY");
+                int y = (int)camera.Mode.ImageHeightPixels;
 
-                tl.LogMessage("NumY Get", camera.Mode.ImageHeightPixels.ToString());
-                return (int)Math.Min(cameraNumY, camera.Mode.ImageHeightPixels);
+                if (camera.ImageReady)
+                {
+                    y = camera.LastImage.Height;
+                }
+
+                tl.LogMessage("NumY Get", y.ToString());
+                return (int)Math.Min(cameraNumY, y);
             }
             set
             {
@@ -1243,7 +1256,7 @@ namespace ASCOM.SonyMirrorless
             {
                 int[,] input = (int[,])array;
 
-                if (startX == 0 && startY == 0 && width == input.GetLength(0) && height == input.GetLength(1))
+                if (startX == 0 && startY == 0 && width >= input.GetLength(0) && height >= input.GetLength(1))
                 {
                     return input;
                 }
@@ -1264,7 +1277,7 @@ namespace ASCOM.SonyMirrorless
             {
                 int[,,] input = (int[,,])array;
 
-                if (startX == 0 && startY == 0 && width == input.GetLength(0) && height == input.GetLength(1))
+                if (startX == 0 && startY == 0 && width >= input.GetLength(0) && height >= input.GetLength(1))
                 {
                     return input;
                 }

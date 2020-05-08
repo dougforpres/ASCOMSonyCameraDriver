@@ -222,17 +222,28 @@ namespace ASCOM.SonyMirrorless
 
             set
             {
-                Mode.Preview = value && ((m_resolutions.CameraFlags & CAMERA_SUPPORTS_LIVEVIEW) != 0);
+                if (value != Mode.Preview)
+                {
+                    Mode.Preview = value && ((m_resolutions.CameraFlags & CAMERA_SUPPORTS_LIVEVIEW) != 0);
 
-                if (!Mode.Preview)
-                {
-                    Mode.ImageWidthPixels = m_resolutions.ImageWidthPixels;
-                    Mode.ImageHeightPixels = m_resolutions.ImageHeightPixels;
-                }
-                else
-                {
-                    Mode.ImageWidthPixels = m_resolutions.PreviewWidthPixels;
-                    Mode.ImageHeightPixels = m_resolutions.PreviewHeightPixels;
+                    if (!Mode.Preview)
+                    {
+                        Mode.ImageWidthPixels = m_resolutions.ImageWidthPixels;
+                        Mode.ImageHeightPixels = m_resolutions.ImageHeightPixels;
+                    }
+                    else
+                    {
+                        Mode.ImageWidthPixels = m_resolutions.PreviewWidthPixels;
+                        Mode.ImageHeightPixels = m_resolutions.PreviewHeightPixels;
+                    }
+
+                    // This allows the driver to return assumed image size not the size of the last image
+                    // which will probably now be different
+                    if (m_lastImage != null)
+                    {
+                        m_lastImage.Cleanup();
+                        m_lastImage = null;
+                    }
                 }
             }
         }
