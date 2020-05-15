@@ -58,15 +58,15 @@ namespace ASCOM.SonyMirrorless
                         m_handle = OpenDevice(m_info.DeviceName);
                         GetCameraInfo(m_handle, ref m_resolutions, 0);
                     }
-                    else
+                }
+                else
+                {
+                    if (m_handle != 1)
                     {
-                        if (m_handle != 1)
-                        {
-                            CloseDevice(m_handle);
-                        }
-
-                        m_handle = INVALID_HANDLE_VALUE;
+                        CloseDevice(m_handle);
                     }
+
+                    m_handle = INVALID_HANDLE_VALUE;
                 }
             }
         }
