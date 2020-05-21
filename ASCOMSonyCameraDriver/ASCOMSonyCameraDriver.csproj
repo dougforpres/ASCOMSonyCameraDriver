@@ -122,6 +122,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <Content Include="ASCOM.ico" />
+    <Content Include="Installer\Sony Mirrorless Driver Setup.iss" />
     <Content Include="License Info.txt" />
     <Content Include="Sony Mirrorless Camera Readme.htm" />
     <None Include="Resources\ASCOM.bmp" />

@@ -30,6 +30,7 @@ using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
 using System.Globalization;
 using System.Collections;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace ASCOM.SonyMirrorless
@@ -101,6 +102,7 @@ namespace ASCOM.SonyMirrorless
         internal static string SaveRawImageFolder = "";
         internal static bool UseLiveview = false;
         internal static int Personality = SonyCommon.PERSONALITY_APT;
+        internal static Mutex serialAccess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="a6400"/> class.
@@ -195,6 +197,7 @@ namespace ASCOM.SonyMirrorless
 
         public void Dispose()
         {
+            LogMessage("Dispose", "Disposing");
             // Clean up the tracelogger and util objects
             if (camera != null)
             {
@@ -251,6 +254,7 @@ namespace ASCOM.SonyMirrorless
                             {
                                 LogMessage("connected", "Found info... creating camera obj", "");
                                 camera = candidate;
+                                camera.Logger = tl;
                                 cameraNumX = (int)camera.Info.ImageWidthPixels;
                                 cameraNumY = (int)camera.Info.ImageHeightPixels;
 
@@ -280,6 +284,7 @@ namespace ASCOM.SonyMirrorless
                     {
                         LogMessage("Connected Set", "Connecting to camera {0}", deviceId);
                         camera.Connected = true;
+                        serialAccess = new Mutex();
                     }
                     else
                     {
@@ -288,6 +293,8 @@ namespace ASCOM.SonyMirrorless
 
                         // Trash the camera in the event the driver id changes
                         camera = null;
+                        serialAccess.Dispose();
+                        serialAccess = null;
                     }
                 }
                 else
@@ -368,18 +375,24 @@ namespace ASCOM.SonyMirrorless
 
         public void AbortExposure()
         {
-            tl.LogMessage("AbortExposure", "Attempting to cancel any in-progress capture");
+            using (new SerializedAccess(this, "AbortExposure()"))
+            {
+                tl.LogMessage("AbortExposure", "Attempting to cancel any in-progress capture");
 
-            camera.StopCapture();
+                camera.StopCapture();
+            }
         }
 
         public short BayerOffsetX
         {
             get
             {
-                tl.LogMessage("BayerOffsetX Get Get", "");
+                using (new SerializedAccess(this, "get_BayerOffsetX"))
+                {
+                    tl.LogMessage("BayerOffsetX Get Get", "");
 
-                return (short)camera.Info.BayerXOffset;
+                    return (short)camera.Info.BayerXOffset;
+                }
             }
         }
 
@@ -387,9 +400,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("BayerOffsetY Get Get", "");
+                using (new SerializedAccess(this, "get_BayerOffsetY"))
+                {
+                    tl.LogMessage("BayerOffsetY Get Get", "");
 
-                return (short)camera.Info.BayerYOffset;
+                    return (short)camera.Info.BayerYOffset;
+                }
             }
         }
 
@@ -397,13 +413,21 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("BinX Get", "1");
-                return 1;
+                using (new SerializedAccess(this, "get_BinX"))
+                {
+                    tl.LogMessage("BinX Get", "1");
+
+                    return 1;
+                }
             }
             set
             {
-                tl.LogMessage("BinX Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+                using (new SerializedAccess(this, "set_BinX"))
+                {
+                    tl.LogMessage("BinX Set", value.ToString());
+
+                    if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
+                }
             }
         }
 
@@ -411,13 +435,21 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("BinY Get", "1");
-                return 1;
+                using (new SerializedAccess(this, "get_BinY"))
+                {
+                    tl.LogMessage("BinY Get", "1");
+
+                    return 1;
+                }
             }
             set
             {
-                tl.LogMessage("BinY Set", value.ToString());
-                if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                using (new SerializedAccess(this, "set_BinY"))
+                {
+                    tl.LogMessage("BinY Set", value.ToString());
+
+                    if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
+                }
             }
         }
 
@@ -425,8 +457,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CCDTemperature Get Get", "Not implemented");
-                throw new ASCOM.InvalidValueException("CCDTemperature Not Available");// PropertyNotImplementedException("CCDTemperature", false);
+                using (new SerializedAccess(this, "get_CCDTemperature"))
+                {
+                    tl.LogMessage("CCDTemperature Get Get", "Not implemented");
+
+                    throw new ASCOM.InvalidValueException("CCDTemperature Not Available");
+                }
             }
         }
 
@@ -434,9 +470,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CameraState Get", camera.State.ToString());
+                using (new SerializedAccess(this, "get_CameraState", true))
+                {
+                    tl.LogMessage("CameraState Get", camera.State.ToString());
 
-                return camera.State;
+                    return camera.State;
+                }
             }
         }
 
@@ -444,10 +483,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read CameraXSize");
+                using (new SerializedAccess(this, "get_CameraXSize", true))
+                {
+                    tl.LogMessage("CameraXSize Get", camera.Info.ImageWidthPixels.ToString());
 
-                tl.LogMessage("CameraXSize Get", camera.Info.ImageWidthPixels.ToString());
-                return (int)camera.Info.ImageWidthPixels;
+                    return (int)camera.Info.ImageWidthPixels;
+                }
             }
         }
 
@@ -455,10 +496,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read CameraYSize");
+                using (new SerializedAccess(this, "get_CameraYSize", true))
+                {
+                    tl.LogMessage("CameraYSize Get", camera.Info.ImageHeightPixels.ToString());
 
-                tl.LogMessage("CameraYSize Get", camera.Info.ImageHeightPixels.ToString());
-                return (int)camera.Info.ImageHeightPixels;
+                    return (int)camera.Info.ImageHeightPixels;
+                }
             }
         }
 
@@ -466,8 +509,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanAbortExposure Get", true.ToString());
-                return true;
+                using (new SerializedAccess(this, "get_CanAbortExposure"))
+                {
+                    tl.LogMessage("CanAbortExposure Get", true.ToString());
+
+                    return true;
+                }
             }
         }
 
@@ -475,8 +522,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanAsymmetricBin Get", false.ToString());
-                return false;
+                using (new SerializedAccess(this, "get_CanAsymmetricBin"))
+                {
+                    tl.LogMessage("CanAsymmetricBin Get", false.ToString());
+
+                    return false;
+                }
             }
         }
 
@@ -484,10 +535,14 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                bool result = Personality != SonyCommon.PERSONALITY_NINA;
+                using (new SerializedAccess(this, "get_CanFastReadout"))
+                {
+                    bool result = Personality != SonyCommon.PERSONALITY_NINA;
 
-                tl.LogMessage("CanFastReadout Get", result.ToString());
-                return result;
+                    tl.LogMessage("CanFastReadout Get", result.ToString());
+
+                    return result;
+                }
             }
         }
 
@@ -495,8 +550,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanGetCoolerPower Get", false.ToString());
-                return false;
+                using (new SerializedAccess(this, "get_CanGetCoolerPower"))
+                {
+                    tl.LogMessage("CanGetCoolerPower Get", false.ToString());
+
+                    return false;
+                }
             }
         }
 
@@ -504,8 +563,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanPulseGuide Get", false.ToString());
-                return false;
+                using (new SerializedAccess(this, "get_CanPulseGuide"))
+                {
+                    tl.LogMessage("CanPulseGuide Get", false.ToString());
+
+                    return false;
+                }
             }
         }
 
@@ -513,8 +576,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanSetCCDTemperature Get", false.ToString());
-                return false;
+                using (new SerializedAccess(this, "get_CanSetCCDTemperature"))
+                {
+                    tl.LogMessage("CanSetCCDTemperature Get", false.ToString());
+
+                    return false;
+                }
             }
         }
 
@@ -522,8 +589,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CanStopExposure Get", true.ToString());
-                return true;
+                using (new SerializedAccess(this, "get_CanStopExposure"))
+                {
+                    tl.LogMessage("CanStopExposure Get", true.ToString());
+
+                    return true;
+                }
             }
         }
 
@@ -531,13 +602,21 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CoolerOn Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerOn", false);
+                using (new SerializedAccess(this, "get_CoolerOn"))
+                {
+                    tl.LogMessage("CoolerOn Get Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("CoolerOn", false);
+                }
             }
             set
             {
-                tl.LogMessage("CoolerOn Set Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerOn", true);
+                using (new SerializedAccess(this, "set_CoolerOn"))
+                {
+                    tl.LogMessage("CoolerOn Set Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("CoolerOn", true);
+                }
             }
         }
 
@@ -545,8 +624,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("CoolerPower Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerPower", false);
+                using (new SerializedAccess(this, "get_CoolerPower"))
+                {
+                    tl.LogMessage("CoolerPower Get Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("CoolerPower", false);
+                }
             }
         }
 
@@ -554,8 +637,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("ElectronsPerADU Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ElectronsPerADU", false);
+                using (new SerializedAccess(this, "get_ElectronsPerADU"))
+                {
+                    tl.LogMessage("ElectronsPerADU Get Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("ElectronsPerADU", false);
+                }
             }
         }
 
@@ -563,10 +650,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read ExposureMax");
+                using (new SerializedAccess(this, "get_ExposureMax", true))
+                {
+                    tl.LogMessage("ExposureMax Get Get", camera.Info.ExposureTimeMax.ToString());
 
-                tl.LogMessage("ExposureMax Get Get", camera.Info.ExposureTimeMax.ToString());
-                return camera.Info.ExposureTimeMax;
+                    return camera.Info.ExposureTimeMax;
+                }
             }
         }
 
@@ -574,10 +663,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read ExposureMin");
+                using (new SerializedAccess(this, "get_ExposureMin", true))
+                {
+                    tl.LogMessage("ExposureMin Get", camera.Info.ExposureTimeMin.ToString());
 
-                tl.LogMessage("ExposureMin Get", camera.Info.ExposureTimeMin.ToString());
-                return camera.Info.ExposureTimeMin;
+                    return camera.Info.ExposureTimeMin;
+                }
             }
         }
 
@@ -585,10 +676,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read ExposureResolution");
+                using (new SerializedAccess(this, "get_ExposureResolution", true))
+                {
+                    tl.LogMessage("ExposureResolution Get", camera.Info.ExposureTimeStep.ToString());
 
-                tl.LogMessage("ExposureResolution Get", camera.Info.ExposureTimeStep.ToString());
-                return camera.Info.ExposureTimeStep;
+                    return camera.Info.ExposureTimeStep;
+                }
             }
         }
 
@@ -596,19 +689,22 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read FastReadout");
+                using (new SerializedAccess(this, "get_FastReadout", true))
+                {
+                    tl.LogMessage("FastReadout Get", camera.Mode.Preview.ToString());
 
-                tl.LogMessage("FastReadout Get", camera.Mode.Preview.ToString());
-                return camera.PreviewMode;
+                    return camera.PreviewMode;
+                }
             }
             set
             {
-                CheckConnected("Camera must be connected to set FastReadout");
+                using (new SerializedAccess(this, "set_FastReadout", true))
+                {
+                    value = value && UseLiveview;
 
-                value = value && UseLiveview;
-
-                tl.LogMessage("FastReadout Set", value.ToString());
-                camera.PreviewMode = value;
+                    tl.LogMessage("FastReadout Set", value.ToString());
+                    camera.PreviewMode = value;
+                }
             }
         }
 
@@ -616,8 +712,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("FullWellCapacity Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FullWellCapacity", false);
+                using (new SerializedAccess(this, "get_FullWellCapacity"))
+                {
+                    tl.LogMessage("FullWellCapacity Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("FullWellCapacity", false);
+                }
             }
         }
 
@@ -625,13 +725,21 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("Gain Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", false);
+                using (new SerializedAccess(this, "get_Gain"))
+                {
+                    tl.LogMessage("Gain Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("Gain", false);
+                }
             }
             set
             {
-                tl.LogMessage("Gain Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", true);
+                using (new SerializedAccess(this, "set_Gain"))
+                {
+                    tl.LogMessage("Gain Set", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("Gain", true);
+                }
             }
         }
 
@@ -639,8 +747,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("GainMax Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMax", false);
+                using (new SerializedAccess(this, "get_GainMax"))
+                {
+                    tl.LogMessage("GainMax Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("GainMax", false);
+                }
             }
         }
 
@@ -648,8 +760,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("GainMin Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMin", true);
+                using (new SerializedAccess(this, "get_GainMin"))
+                {
+                    tl.LogMessage("GainMin Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("GainMin", true);
+                }
             }
         }
 
@@ -657,8 +773,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("Gains Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gains", true);
+                using (new SerializedAccess(this, "get_Gains"))
+                {
+                    tl.LogMessage("Gains Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("Gains", true);
+                }
             }
         }
 
@@ -666,8 +786,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("HasShutter Get", true.ToString());
-                return true;
+                using (new SerializedAccess(this, "get_HasShutter"))
+                {
+                    tl.LogMessage("HasShutter Get", true.ToString());
+
+                    return true;
+                }
             }
         }
 
@@ -675,8 +799,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("HeatSinkTemperature Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("HeatSinkTemperature", false);
+                using (new SerializedAccess(this, "get_HeatSinkTemperature"))
+                {
+                    tl.LogMessage("HeatSinkTemperature Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("HeatSinkTemperature", false);
+                }
             }
         }
 
@@ -684,54 +812,55 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read image");
-
-                object result = null;
-
-                if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                using (new SerializedAccess(this, "get_ImageArray", true))
                 {
-                    tl.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
-                    throw new ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!");
-                }
+                    object result = null;
 
-                SonyImage image = camera.LastImage;
+                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    {
+                        tl.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
+                        throw new ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!");
+                    }
 
-                int requestedWidth = NumX;
-                int requestedHeight = NumY;
-                LogMessage("ImageArray", "requestedWidth = {0}, cameraNumX = {1}, camera.Mode.ImageWidth = {2}", (int)Math.Min(cameraNumX, camera.Mode.ImageWidthPixels), cameraNumX, camera.Mode.ImageWidthPixels);
+                    SonyImage image = camera.LastImage;
 
-                tl.LogMessage("ImageArray Get", String.Format("(numX = {0}, numY = {1}, image.Width = {2}, image.Height = {3})", requestedWidth, requestedHeight, image.Width, image.Height));
+                    int requestedWidth = NumX;
+                    int requestedHeight = NumY;
+                    LogMessage("ImageArray", "requestedWidth = {0}, cameraNumX = {1}, camera.Mode.ImageWidth = {2}", (int)Math.Min(cameraNumX, camera.Mode.ImageWidthPixels), cameraNumX, camera.Mode.ImageWidthPixels);
 
-                switch (image.m_info.ImageMode)
-                {
-                    case 1:
-                        tl.LogMessage("BAYER info", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+                    tl.LogMessage("ImageArray Get", String.Format("(numX = {0}, numY = {1}, image.Width = {2}, image.Height = {3})", requestedWidth, requestedHeight, image.Width, image.Height));
 
-                        result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
-                        break;
-
-                    case 2:
-                        if (Personality != SonyCommon.PERSONALITY_NINA)
-                        {
-                            tl.LogMessage("RGB info", String.Format("Dimensions = {0}, {1} x {2} x {3}", SonyImage.RGB.Rank, SonyImage.RGB.GetLength(0), SonyImage.RGB.GetLength(1), SonyImage.RGB.GetLength(2)));
-
-                            result = Resize(SonyImage.RGB, SonyImage.RGB.Rank, StartX, StartY, requestedWidth, requestedHeight);
-                        }
-                        else
-                        {
-                            tl.LogMessage("RGB info as MONO", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+                    switch (image.m_info.ImageMode)
+                    {
+                        case 1:
+                            tl.LogMessage("BAYER info", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
 
                             result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
-                        }
-                        break;
+                            break;
 
-                    default:
-                        tl.LogMessage("Unknown info", String.Format("{0} - Throwing", image.m_info.ImageMode));
+                        case 2:
+                            if (Personality != SonyCommon.PERSONALITY_NINA)
+                            {
+                                tl.LogMessage("RGB info", String.Format("Dimensions = {0}, {1} x {2} x {3}", SonyImage.RGB.Rank, SonyImage.RGB.GetLength(0), SonyImage.RGB.GetLength(1), SonyImage.RGB.GetLength(2)));
 
-                        throw new ASCOM.InvalidOperationException("Call to ImageArray resulted in invalid image type!");
+                                result = Resize(SonyImage.RGB, SonyImage.RGB.Rank, StartX, StartY, requestedWidth, requestedHeight);
+                            }
+                            else
+                            {
+                                tl.LogMessage("RGB info as MONO", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+
+                                result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
+                            }
+                            break;
+
+                        default:
+                            tl.LogMessage("Unknown info", String.Format("{0} - Throwing", image.m_info.ImageMode));
+
+                            throw new ASCOM.InvalidOperationException("Call to ImageArray resulted in invalid image type!");
+                    }
+
+                    return result;
                 }
-
-                return result;
             }
         }
 
@@ -739,16 +868,17 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read image");
-
-                if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                using (new SerializedAccess(this, "get_ImageArrayVariant", true))
                 {
-                    tl.LogMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!");
-                    throw new ASCOM.InvalidOperationException("Call to ImageArrayVariant before the first image has been taken!");
-                }
-                object[,,] cameraImageArrayVariant = new object[cameraNumX, cameraNumY, 3];
+                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    {
+                        tl.LogMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!");
+                        throw new ASCOM.InvalidOperationException("Call to ImageArrayVariant before the first image has been taken!");
+                    }
+                    object[,,] cameraImageArrayVariant = new object[cameraNumX, cameraNumY, 3];
 
-                return cameraImageArrayVariant;
+                    return cameraImageArrayVariant;
+                }
             }
         }
 
@@ -756,11 +886,14 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to check image status");
+                using (new SerializedAccess(this, "get_ImageReady", true))
+                {
+                    bool ready = camera.ImageReady;
 
-                tl.LogMessage("ImageReady Get", camera.LastImage.Status.ToString());
+                    tl.LogMessage("ImageReady Get", ready.ToString());
 
-                return camera.ImageReady;
+                    return ready;
+                }
             }
         }
 
@@ -768,8 +901,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("IsPulseGuiding Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("IsPulseGuiding", false);
+                using (new SerializedAccess(this, "get_IsPulseGuiding"))
+                {
+                    tl.LogMessage("IsPulseGuiding Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("IsPulseGuiding", false);
+                }
             }
         }
 
@@ -777,18 +914,19 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read last exposure duration");
-
-                if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                using (new SerializedAccess(this, "get_LastExposureDuration", true))
                 {
-                    tl.LogMessage("LastExposureDuration Get", "Throwing InvalidOperationException because of a call to LastExposureDuration before the first image has been taken!");
-                    throw new ASCOM.InvalidOperationException("Call to LastExposureDuration before the first image has been taken!");
+                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    {
+                        tl.LogMessage("LastExposureDuration Get", "Throwing InvalidOperationException because of a call to LastExposureDuration before the first image has been taken!");
+                        throw new ASCOM.InvalidOperationException("Call to LastExposureDuration before the first image has been taken!");
+                    }
+
+                    double result = camera.LastImage.Duration;
+                    tl.LogMessage("LastExposureDuration Get", result.ToString());
+
+                    return result;
                 }
-
-                double result = camera.LastImage.Duration;
-                tl.LogMessage("LastExposureDuration Get", result.ToString());
-
-                return result;
             }
         }
 
@@ -796,17 +934,18 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to read last exposure time");
-
-                if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                using (new SerializedAccess(this, "get_LastExposureStartTime", true))
                 {
-                    tl.LogMessage("LastExposureStartTime Get", "Throwing InvalidOperationException because of a call to LastExposureStartTime before the first image has been taken!");
-                    throw new ASCOM.InvalidOperationException("Call to LastExposureStartTime before the first image has been taken!");
-                }
+                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    {
+                        tl.LogMessage("LastExposureStartTime Get", "Throwing InvalidOperationException because of a call to LastExposureStartTime before the first image has been taken!");
+                        throw new ASCOM.InvalidOperationException("Call to LastExposureStartTime before the first image has been taken!");
+                    }
 
-                string exposureStartString = camera.LastImage.StartTime.ToString("yyyy-MM-ddTHH:mm:ss");
-                tl.LogMessage("LastExposureStartTime Get", exposureStartString.ToString());
-                return exposureStartString;
+                    string exposureStartString = camera.LastImage.StartTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                    tl.LogMessage("LastExposureStartTime Get", exposureStartString.ToString());
+                    return exposureStartString;
+                }
             }
         }
 
@@ -814,8 +953,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("MaxADU Get", "20000");
-                return 20000;
+                using (new SerializedAccess(this, "get_MaxADU"))
+                {
+                    tl.LogMessage("MaxADU Get", "20000");
+
+                    return 20000;
+                }
             }
         }
 
@@ -823,8 +966,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("MaxBinX Get", "1");
-                return 1;
+                using (new SerializedAccess(this, "get_MaxBinX"))
+                {
+                    tl.LogMessage("MaxBinX Get", "1");
+
+                    return 1;
+                }
             }
         }
 
@@ -832,8 +979,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("MaxBinY Get", "1");
-                return 1;
+                using (new SerializedAccess(this, "get_MaxBinY"))
+                {
+                    tl.LogMessage("MaxBinY Get", "1");
+
+                    return 1;
+                }
             }
         }
 
@@ -841,24 +992,26 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get NumX");
-
-                int x = (int)camera.Mode.ImageWidthPixels;
-
-                if (camera.ImageReady)
+                using (new SerializedAccess(this, "get_NumX", true))
                 {
-                    x = camera.LastImage.Width;
-                }
+                    int x = (int)camera.Mode.ImageWidthPixels;
 
-                tl.LogMessage("NumX Get", x.ToString());
-                return (int)Math.Min(cameraNumX, x);
+                    if (camera.ImageReady)
+                    {
+                        x = camera.LastImage.Width;
+                    }
+
+                    tl.LogMessage("NumX Get", x.ToString());
+                    return (int)Math.Min(cameraNumX, x);
+                }
             }
             set
             {
-                CheckConnected("Camera must be connected to set NumX");
-
-                cameraNumX = value;// (int)Math.Min(value, camera.Mode.ImageWidthPixels);
-                tl.LogMessage("NumX set", value.ToString());
+                using (new SerializedAccess(this, "set_NumX", true))
+                {
+                    cameraNumX = value;
+                    tl.LogMessage("NumX set", value.ToString());
+                }
             }
         }
 
@@ -866,24 +1019,27 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get NumY");
-                int y = (int)camera.Mode.ImageHeightPixels;
-
-                if (camera.ImageReady)
+                using (new SerializedAccess(this, "get_NumY", true))
                 {
-                    y = camera.LastImage.Height;
-                }
+                    int y = (int)camera.Mode.ImageHeightPixels;
 
-                tl.LogMessage("NumY Get", y.ToString());
-                return (int)Math.Min(cameraNumY, y);
+                    if (camera.ImageReady)
+                    {
+                        y = camera.LastImage.Height;
+                    }
+
+                    tl.LogMessage("NumY Get", y.ToString());
+                    return (int)Math.Min(cameraNumY, y);
+                }
             }
             set
             {
-                CheckConnected("Camera must be connected to set NumY");
-
-                // NINA sets this before it changes readout mode
-                cameraNumY = value;// (int)Math.Min(value, camera.Mode.ImageHeightPixels);
-                tl.LogMessage("NumY set", value.ToString());
+                using (new SerializedAccess(this, "set_NumY", true))
+                {
+                    // NINA sets this before it changes readout mode
+                    cameraNumY = value;
+                    tl.LogMessage("NumY set", value.ToString());
+                }
             }
         }
 
@@ -891,8 +1047,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("PercentCompleted Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("PercentCompleted", false);
+                using (new SerializedAccess(this, "get_PercentCompleted"))
+                {
+                    tl.LogMessage("PercentCompleted Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("PercentCompleted", false);
+                }
             }
         }
 
@@ -900,10 +1060,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get pixelsizex");
+                using (new SerializedAccess(this, "get_PixelSizeX", true))
+                {
+                    tl.LogMessage("PixelSizeX Get", camera.Info.PixelWidth.ToString());
 
-                tl.LogMessage("PixelSizeX Get", camera.Info.PixelWidth.ToString());
-                return camera.Info.PixelWidth;
+                    return camera.Info.PixelWidth;
+                }
             }
         }
 
@@ -911,50 +1073,59 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get pixelsizey");
+                using (new SerializedAccess(this, "get_PixelSizeY", true))
+                {
+                    tl.LogMessage("PixelSizeY Get", camera.Info.PixelHeight.ToString());
 
-                tl.LogMessage("PixelSizeY Get", camera.Info.PixelHeight.ToString());
-                return camera.Info.PixelHeight;
+                    return camera.Info.PixelHeight;
+                }
             }
         }
 
         public void PulseGuide(GuideDirections Direction, int Duration)
         {
-            tl.LogMessage("PulseGuide", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("PulseGuide");
+            using (new SerializedAccess(this, "PulseGuide()"))
+            {
+                tl.LogMessage("PulseGuide", "Not implemented");
+
+                throw new ASCOM.MethodNotImplementedException("PulseGuide");
+            }
         }
 
         public short ReadoutMode
         {
             get
             {
-                CheckConnected("Camera must be connected to get readout mode");
+                using (new SerializedAccess(this, "get_ReadoutMode", true))
+                {
+                    tl.LogMessage("ReadoutMode Get", camera.OutputMode.ToString());
 
-                tl.LogMessage("ReadoutMode Get", camera.OutputMode.ToString());
-                return (short)(camera.OutputMode - 1);
+                    return (short)(camera.OutputMode - 1);
+                }
             }
             set
             {
-                CheckConnected("Camera must be connected to set readout mode");
-
-                if (ReadoutModes.Count > value)
+                using (new SerializedAccess(this, "set_ReadoutMode", true))
                 {
-                    tl.LogMessage("ReadoutMode Set", value.ToString());
-
-                    switch (value)
+                    if (ReadoutModes.Count > value)
                     {
-                        case 0:
-                            camera.PreviewMode = false;
-                            break;
+                        tl.LogMessage("ReadoutMode Set", value.ToString());
 
-                        case 1:
-                            camera.PreviewMode = true;
-                            break;
+                        switch (value)
+                        {
+                            case 0:
+                                camera.PreviewMode = false;
+                                break;
+
+                            case 1:
+                                camera.PreviewMode = true;
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    throw new ASCOM.InvalidValueException("ReadoutMode not in allowable values");
+                    else
+                    {
+                        throw new ASCOM.InvalidValueException("ReadoutMode not in allowable values");
+                    }
                 }
             }
         }
@@ -963,23 +1134,26 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                ArrayList modes = new ArrayList();
-
-                modes.Add(String.Format("Full Resolution ({0} x {1})", camera.Resolutions.ImageWidthPixels, camera.Resolutions.ImageHeightPixels));
-
-                if (camera.HasLiveView)
+                using (new SerializedAccess(this, "get_ReadoutModes", true))
                 {
-                    if (Personality == SonyCommon.PERSONALITY_NINA)
-                    {
-                        modes.Add(String.Format("LiveView ({0} x {1}) [Mono]", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
-                    }
-                    else
-                    {
-                        modes.Add(String.Format("LiveView ({0} x {1})", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
-                    }
-                };
+                    ArrayList modes = new ArrayList();
 
-                return modes;
+                    modes.Add(String.Format("Full Resolution ({0} x {1})", camera.Resolutions.ImageWidthPixels, camera.Resolutions.ImageHeightPixels));
+
+                    if (camera.HasLiveView)
+                    {
+                        if (Personality == SonyCommon.PERSONALITY_NINA)
+                        {
+                            modes.Add(String.Format("LiveView ({0} x {1}) [Mono]", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
+                        }
+                        else
+                        {
+                            modes.Add(String.Format("LiveView ({0} x {1})", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
+                        }
+                    }
+
+                    return modes;
+                }
             }
         }
 
@@ -987,10 +1161,12 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get SensorName");
+                using (new SerializedAccess(this, "get_SensorName", true))
+                {
+                    tl.LogMessage("SensorName Get", camera.Info.SensorName);
 
-                tl.LogMessage("SensorName Get", camera.Info.SensorName);
-                return camera.Info.SensorName;
+                    return camera.Info.SensorName;
+                }
             }
         }
 
@@ -998,20 +1174,22 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                CheckConnected("Camera must be connected to get SensorType");
-
-                SensorType type;
-
-                if (Personality == SonyCommon.PERSONALITY_NINA)
+                using (new SerializedAccess(this, "get_SensorType", true))
                 {
-                    type = camera.PreviewMode ? SensorType.Monochrome : SensorType.RGGB;
+                    SensorType type;
+
+                    if (Personality == SonyCommon.PERSONALITY_NINA)
+                    {
+                        type = camera.PreviewMode ? SensorType.Monochrome : SensorType.RGGB;
+                    }
+                    else
+                    {
+                        type = camera.OutputMode == SonyCamera.ImageMode.RGB ? SensorType.Color : SensorType.RGGB;
+                    }
+                    tl.LogMessage("SensorType Get", type.ToString());
+
+                    return type;
                 }
-                else
-                {
-                    type = camera.OutputMode == SonyCamera.ImageMode.RGB ? SensorType.Color : SensorType.RGGB;
-                }
-                tl.LogMessage("SensorType Get", type.ToString());
-                return type;
             }
         }
 
@@ -1019,40 +1197,57 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("SetCCDTemperature Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", false);
+                using (new SerializedAccess(this, "get_SetCCDTemperature"))
+                {
+                    tl.LogMessage("SetCCDTemperature Get", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", false);
+                }
             }
             set
             {
-                tl.LogMessage("SetCCDTemperature Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", true);
+                using (new SerializedAccess(this, "set_SetCCDTemperature"))
+                {
+                    tl.LogMessage("SetCCDTemperature Set", "Not implemented");
+
+                    throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", true);
+                }
             }
         }
 
         public void StartExposure(double Duration, bool Light)
         {
-            CheckConnected("Camera must be connected to start exposure");
+            using (new SerializedAccess(this, "StartExposure()", true))
+            {
+                if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
+                if (StartX + NumX > camera.Mode.ImageWidthPixels) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), camera.Info.ImageWidthPixels.ToString());
+                if (StartY + NumY > camera.Mode.ImageHeightPixels) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), camera.Info.ImageHeightPixels.ToString());
 
-            if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
-            if (StartX + NumX > camera.Mode.ImageWidthPixels) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), camera.Info.ImageWidthPixels.ToString());
-            if (StartY + NumY > camera.Mode.ImageHeightPixels) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), camera.Info.ImageHeightPixels.ToString());
+                tl.LogMessage("StartExposure", String.Format("Duration={0}, Light={1}", Duration.ToString(), Light.ToString()));
 
-            tl.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString());
-
-            camera.StartCapture(Duration, Personality, defaultReadoutMode);
+                camera.StartCapture(Duration, Personality, defaultReadoutMode);
+            }
         }
 
         public int StartX
         {
             get
             {
-                tl.LogMessage("StartX Get", cameraStartX.ToString());
-                return cameraStartX;
+                using (new SerializedAccess(this, "get_StartX"))
+                {
+                    tl.LogMessage("StartX Get", cameraStartX.ToString());
+
+                    return cameraStartX;
+                }
             }
             set
             {
-                cameraStartX = value;
-                tl.LogMessage("StartX Set", value.ToString());
+                using (new SerializedAccess(this, "set_StartX"))
+                {
+                    cameraStartX = value;
+
+                    tl.LogMessage("StartX Set", value.ToString());
+                }
             }
         }
 
@@ -1060,22 +1255,31 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                tl.LogMessage("StartY Get", cameraStartY.ToString());
-                return cameraStartY;
+                using (new SerializedAccess(this, "get_StartY"))
+                {
+                    tl.LogMessage("StartY Get", cameraStartY.ToString());
+
+                    return cameraStartY;
+                }
             }
             set
             {
-                cameraStartY = value;
-                tl.LogMessage("StartY set", value.ToString());
+                using (new SerializedAccess(this, "set_StartY"))
+                {
+                    cameraStartY = value;
+
+                    tl.LogMessage("StartY set", value.ToString());
+                }
             }
         }
 
         public void StopExposure()
         {
-            CheckConnected("Camera must be connected to stop exposure");
-
-            tl.LogMessage("StopExposure", "Attempting to stop exposure");
-            camera.StopCapture();
+            using (new SerializedAccess(this, "StopExposure()", true))
+            {
+                tl.LogMessage("StopExposure", "Attempting to stop exposure");
+                camera.StopCapture();
+            }
         }
 
         #endregion
@@ -1178,6 +1382,7 @@ namespace ASCOM.SonyMirrorless
         {
             if (!IsConnected)
             {
+                LogMessage("CheckConnected", message);
                 throw new ASCOM.NotConnectedException(message);
             }
         }
@@ -1302,6 +1507,35 @@ namespace ASCOM.SonyMirrorless
             {
                 // Ummm
                 throw new ASCOM.InvalidValueException();
+            }
+        }
+
+        public class SerializedAccess : IDisposable
+        {
+            internal String m_method;
+
+            public SerializedAccess(Camera cam, String method, bool checkConnected = false)
+            {
+                m_method = method;
+
+                if (checkConnected)
+                {
+                    cam.CheckConnected(String.Format("Camera must be connected before '{0}' can be called", method));
+                }
+
+                if (!serialAccess.WaitOne(1000))
+                {
+                    LogMessage(m_method, "Waiting to enter");
+                    serialAccess.WaitOne();
+                }
+
+                LogMessage(m_method, "[in]");
+            }
+
+            public void Dispose()
+            {
+                LogMessage(m_method, "[out]");
+                serialAccess.ReleaseMutex();
             }
         }
     }

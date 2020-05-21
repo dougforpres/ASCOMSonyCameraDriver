@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using ASCOM.DeviceInterface;
+using ASCOM.Utilities;
 using System.IO;
 
 namespace ASCOM.SonyMirrorless
@@ -18,6 +19,7 @@ namespace ASCOM.SonyMirrorless
         internal ImageMode m_outputMode = ImageMode.RGB;
         internal CameraInfo m_resolutions;
         internal Dictionary<UInt32, CameraProperty> m_properties = new Dictionary<UInt32, CameraProperty>();
+        internal TraceLogger m_logger = null;
 
         public enum ImageMode
         {
@@ -37,9 +39,16 @@ namespace ASCOM.SonyMirrorless
             m_info = info;
             m_mode = new CaptureMode();
             m_resolutions = new CameraInfo();
-
             m_mode.ImageWidthPixels = m_info.ImageWidthPixels;
             m_mode.ImageHeightPixels = m_info.ImageHeightPixels;
+        }
+
+        public TraceLogger Logger
+        {
+            set
+            {
+                m_logger = value;
+            }
         }
 
         public bool Connected
@@ -123,7 +132,7 @@ namespace ASCOM.SonyMirrorless
             }
 
             // SharpCap seems to run really close to the limit... this might help, but may also affect performance
-            if (personality == PERSONALITY_SHARPCAP && readoutMode == OUTPUTFORMAT_BGR)
+            if (personality == PERSONALITY_NINA || personality == PERSONALITY_SHARPCAP)
             {
                 GC.Collect();
             }
@@ -136,12 +145,12 @@ namespace ASCOM.SonyMirrorless
             {
                 info.ImageMode = IMAGEMODE_RGB;
                 GetPreviewImage(m_handle, ref info);
-                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode);
+                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
             }
             else
             {
                 StartCapture(m_handle, ref info);
-                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode);
+                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
             }
 
             return m_lastImage;
@@ -324,6 +333,14 @@ namespace ASCOM.SonyMirrorless
         public void RefreshProperties()
         {
             RefreshPropertyList(m_handle);
+        }
+
+        private void Log(String message)
+        {
+            if (m_logger != null)
+            {
+                m_logger.LogMessage("SonyCamera", message);
+            }
         }
     }
 }

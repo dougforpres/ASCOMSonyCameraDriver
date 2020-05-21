@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
+using ASCOM.Utilities;
 
 namespace ASCOM.SonyMirrorless
 {
@@ -16,6 +17,7 @@ namespace ASCOM.SonyMirrorless
 
         internal ImageInfo m_info;
         internal UInt32 m_cameraHandle;
+        internal TraceLogger m_logger;
         public DateTime StartTime = DateTime.Now;
         private int m_personality;
         private short m_readoutMode;
@@ -27,9 +29,10 @@ namespace ASCOM.SonyMirrorless
         public static int[,,] RGB;
         public static int[,] BAYER;
 
-        public SonyImage(UInt32 handle, ImageInfo info, int personality, short readoutMode)
+        public SonyImage(UInt32 handle, ImageInfo info, int personality, short readoutMode, TraceLogger logger)
         {
             m_cameraHandle = handle;
+            m_logger = logger;
             m_info = info;
             m_personality = personality;
             m_readoutMode = readoutMode;
@@ -52,30 +55,43 @@ namespace ASCOM.SonyMirrorless
                     case ImageStatus.Ready:
                     case ImageStatus.Failed:
                     case ImageStatus.Cancelled:
+                        Log(String.Format("get_Status - returning {0}", m_status.ToString()));
                         break;
 
                     case ImageStatus.Capturing:
                         // Figure out if we've finished
+                        Log("get_Status - capturing, refreshing");
                         GetCaptureStatus(m_cameraHandle, ref m_info);
 
                         switch (m_info.Status)
                         {
                             case STATUS_CANCELLED:
                                 m_status = ImageStatus.Cancelled;
+                                Log("get_Status - latest = Cancelled");
                                 break;
 
                             case STATUS_FAILED:
                                 m_status = ImageStatus.Failed;
+                                Log("get_Status - latest = Failed");
                                 break;
 
-                            case STATUS_EXPOSING:
+                            case STATUS_STARTING: // Getting ready to press button
+                            case STATUS_EXPOSING: // Button is down
+                            case STATUS_READING:  // Reading from camera, not driver
                                 m_status = ImageStatus.Capturing;
+                                Log("get_Status - latest = Capturing");
                                 break;
 
                             case STATUS_COMPLETE:
                                 m_status = ImageStatus.Reading;
+                                Log("get_Status - latest = Reading");
                                 ProcessImageData();
                                 m_status = ImageStatus.Ready;
+                                Log("get_Status - latest = Reading");
+                                break;
+
+                            default:
+                                Log(String.Format("get_Status - latest = unknown {0}", m_info.Status.ToString()));
                                 break;
                         }
                         break;
@@ -102,11 +118,25 @@ namespace ASCOM.SonyMirrorless
         {
             byte[] returndata = null;
 
+            Log("Processing Image Data - in");
+
             try
             {
+                Log(String.Format("m_info.ImageSize = {0}", m_info.ImageSize.ToString()));
+                Log(String.Format("m_info.Width     = {0}", m_info.Width.ToString()));
+                Log(String.Format("m_info.Height    = {0}", m_info.Height.ToString()));
+                Log(String.Format("m_info.ImageMode = {0}", m_info.ImageMode.ToString()));
+
                 int numValues = (Int32)m_info.ImageSize / sizeof(ushort);
 
+                Log(String.Format("Allocating {0} bytes", numValues.ToString()));
+
                 returndata = new byte[m_info.ImageSize];
+
+                if (returndata == null)
+                {
+                    Log("Unable to allocate memory for image");
+                }
 
                 Width = (int)m_info.Width;
                 Height = (int)m_info.Height;
@@ -183,6 +213,8 @@ namespace ASCOM.SonyMirrorless
 
                 Cleanup();
             }
+
+            Log("Processing Image Data - out");
         }
 
         public void Cleanup()
@@ -191,6 +223,14 @@ namespace ASCOM.SonyMirrorless
             {
                 Marshal.FreeCoTaskMem(m_info.ImageData);
                 m_info.ImageData = IntPtr.Zero;
+            }
+        }
+
+        private void Log(String message)
+        {
+            if (m_logger != null)
+            {
+                m_logger.LogMessage("SonyImage", message);
             }
         }
     }
