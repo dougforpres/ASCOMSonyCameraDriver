@@ -5,15 +5,15 @@
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
 AppName=ASCOM Sony Mirrorless Driver Camera Driver
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.11
-AppVersion=0.0.11
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.13
+AppVersion=0.0.13
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
 VersionInfoVersion=1.0.1
 MinVersion=0,6.0.2195sp4
-DefaultDirName="{cf}\ASCOM\Camera"
+DefaultDirName="{commoncf}\ASCOM\Camera"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir="."
@@ -23,14 +23,14 @@ SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected
 WizardImageFile="C:\Program Files (x86)\ASCOM\Platform 6 Developer Components\Installer Generator\Resources\WizardImage.bmp"
 LicenseFile="C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\License Info.txt"
-; {cf}\ASCOM\Uninstall\Camera folder created by Platform, always
-UninstallFilesDir="{cf}\ASCOM\Uninstall\Camera\Sony Mirrorless Driver"
+; {commoncf}\ASCOM\Uninstall\Camera folder created by Platform, always
+UninstallFilesDir="{commoncf}\ASCOM\Uninstall\Camera\Sony Mirrorless Driver"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Dirs]
-Name: "{cf}\ASCOM\Uninstall\Camera\Sony Mirrorless Driver"
+Name: "{commoncf}\ASCOM\Uninstall\Camera\Sony Mirrorless Driver"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
