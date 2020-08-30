@@ -63,18 +63,21 @@ namespace ASCOM.SonyMirrorless
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.comboBoxPersonality = new System.Windows.Forms.ComboBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxAutoLiveview = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmdOK
             // 
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(1051, 610);
+            this.cmdOK.Location = new System.Drawing.Point(1051, 843);
             this.cmdOK.Margin = new System.Windows.Forms.Padding(6);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(118, 46);
@@ -87,7 +90,7 @@ namespace ASCOM.SonyMirrorless
             // 
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(921, 610);
+            this.cmdCancel.Location = new System.Drawing.Point(921, 843);
             this.cmdCancel.Margin = new System.Windows.Forms.Padding(6);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(118, 48);
@@ -407,11 +410,33 @@ namespace ASCOM.SonyMirrorless
             this.comboBoxPersonality.TabIndex = 0;
             this.comboBoxPersonality.SelectedIndexChanged += new System.EventHandler(this.comboBoxPersonality_SelectedIndexChanged);
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.checkBoxAutoLiveview);
+            this.groupBox2.Location = new System.Drawing.Point(32, 616);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(541, 100);
+            this.groupBox2.TabIndex = 20;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Custom Settings";
+            // 
+            // checkBoxAutoLiveview
+            // 
+            this.checkBoxAutoLiveview.AutoSize = true;
+            this.checkBoxAutoLiveview.Location = new System.Drawing.Point(17, 43);
+            this.checkBoxAutoLiveview.Name = "checkBoxAutoLiveview";
+            this.checkBoxAutoLiveview.Size = new System.Drawing.Size(358, 29);
+            this.checkBoxAutoLiveview.TabIndex = 0;
+            this.checkBoxAutoLiveview.Text = "Use LiveView for 0.0s exposures";
+            this.checkBoxAutoLiveview.UseVisualStyleBackColor = true;
+            this.checkBoxAutoLiveview.CheckedChanged += new System.EventHandler(this.checkBoxAutoLiveview_CheckedChanged);
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1189, 673);
+            this.ClientSize = new System.Drawing.Size(1189, 906);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -440,6 +465,8 @@ namespace ASCOM.SonyMirrorless
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -481,5 +508,7 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.TextBox textBoxCameraISO;
         private System.Windows.Forms.TextBox textBoxCameraBatteryLevel;
         private System.Windows.Forms.Label labelCameraBatteryLevel;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.CheckBox checkBoxAutoLiveview;
     }
 }

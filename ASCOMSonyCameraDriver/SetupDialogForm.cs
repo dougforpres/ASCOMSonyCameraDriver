@@ -14,6 +14,8 @@ namespace ASCOM.SonyMirrorless
     [ComVisible(false)]					// Form not registered for COM!
     public partial class SetupDialogForm : Form
     {
+        internal bool InInit = false;
+
         public SetupDialogForm()
         {
             InitializeComponent();
@@ -31,6 +33,7 @@ namespace ASCOM.SonyMirrorless
             Camera.SaveRawImageData = checkBoxEnableSaveLocation.Checked;
             Camera.SaveRawImageFolder = textBoxSaveLocation.Text;
             Camera.UseLiveview = checkBoxUseLiveview.Checked;
+            Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
         }
 
@@ -58,6 +61,7 @@ namespace ASCOM.SonyMirrorless
 
         private void InitUI()
         {
+            InInit = true;
             chkTrace.Checked = Camera.tl.Enabled;
             SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
             String selected = "";
@@ -84,6 +88,7 @@ namespace ASCOM.SonyMirrorless
             textBoxSaveLocation.Text = Camera.SaveRawImageFolder;
             buttonSelectFolder.Enabled = Camera.SaveRawImageData;
             checkBoxUseLiveview.Checked = Camera.UseLiveview;
+            checkBoxAutoLiveview.Checked = Camera.AutoLiveview;
 
             Dictionary<int, string> personalities = new Dictionary<int, string>();
 
@@ -101,6 +106,7 @@ namespace ASCOM.SonyMirrorless
 
             comboBoxOutputFormat.SelectedValue = Camera.defaultReadoutMode;
 
+            InInit = false;
             timer1.Tick += showCameraStatus;
             timer1.Start();
         }
@@ -223,6 +229,14 @@ namespace ASCOM.SonyMirrorless
             comboBoxOutputFormat.DataSource = new BindingSource(outputFormats, null);
             comboBoxOutputFormat.DisplayMember = "Value";
             comboBoxOutputFormat.ValueMember = "Key";
+        }
+
+        private void checkBoxAutoLiveview_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!InInit && checkBoxAutoLiveview.Checked)
+            {
+                MessageBox.Show("Please note that this feature is experimental.\n\nThis will automatically take a LiveView image instead of a normal exposure if:\n  - The camera supports it\n  - The exposure time is set to less than\n    or equal to 0.00001s (in APT this is\n    represented as 0.000)");
+            }
         }
     }
 }

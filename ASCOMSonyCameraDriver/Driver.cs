@@ -72,6 +72,8 @@ namespace ASCOM.SonyMirrorless
         internal static string saveRawImageDefault = "false";
         internal static string useLiveviewProfileName = "Use Camera Liveview";
         internal static string useLiveviewDefault = "true";
+        internal static string autoLiveviewProfileName = "Auto Liveview";
+        internal static string autoLiveviewDefault = "false";
         internal static string personalityProfileName = "Personality";
         internal static string personalityDefault = "1";
 
@@ -101,7 +103,10 @@ namespace ASCOM.SonyMirrorless
         internal static bool SaveRawImageData = false;
         internal static string SaveRawImageFolder = "";
         internal static bool UseLiveview = false;
+        internal static bool AutoLiveview = false;
         internal static int Personality = SonyCommon.PERSONALITY_APT;
+
+        internal static bool LastSetFastReadout = false;
         internal static Mutex serialAccess;
 
         /// <summary>
@@ -704,6 +709,7 @@ namespace ASCOM.SonyMirrorless
 
                     tl.LogMessage("FastReadout Set", value.ToString());
                     camera.PreviewMode = value;
+                    LastSetFastReadout = value;
                 }
             }
         }
@@ -1223,6 +1229,19 @@ namespace ASCOM.SonyMirrorless
                 if (StartX + NumX > camera.Mode.ImageWidthPixels) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), camera.Info.ImageWidthPixels.ToString());
                 if (StartY + NumY > camera.Mode.ImageHeightPixels) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), camera.Info.ImageHeightPixels.ToString());
 
+                if (!LastSetFastReadout)
+                {
+                    if (Duration <= 1.0e-5 && camera.HasLiveView && AutoLiveview)
+                    {
+                        camera.PreviewMode = true;
+                        tl.LogMessage("StartExposure", "Asked for 0.0s exposure, AutoLiveview enabled and camera supports it - taking image as liveview");
+                    }
+                    else
+                    {
+                        camera.PreviewMode = false;
+                    }
+                }
+
                 tl.LogMessage("StartExposure", String.Format("Duration={0}, Light={1}", Duration.ToString(), Light.ToString()));
 
                 camera.StartCapture(Duration, Personality, defaultReadoutMode);
@@ -1401,6 +1420,7 @@ namespace ASCOM.SonyMirrorless
                 SaveRawImageData = Convert.ToBoolean(driverProfile.GetValue(driverID, saveRawImageProfileName, string.Empty, saveRawImageDefault));
                 UseLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, useLiveviewProfileName, string.Empty, useLiveviewDefault));
                 Personality = Convert.ToInt16(driverProfile.GetValue(driverID, personalityProfileName, string.Empty, personalityDefault));
+                AutoLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, autoLiveviewProfileName, string.Empty, autoLiveviewDefault));
 
                 if (defaultReadoutMode == 0)
                 {
@@ -1413,6 +1433,7 @@ namespace ASCOM.SonyMirrorless
                 LogMessage("ReadProfile", "Default Readout Mode: {0}", defaultReadoutMode.ToString());
                 LogMessage("ReadProfile", "Save Raw files:       {0}", SaveRawImageData.ToString());
                 LogMessage("ReadProfile", "Use Liveview:         {0}", UseLiveview.ToString());
+                LogMessage("ReadProfile", "AutoLiveview @ 0.0s:  {0}", AutoLiveview.ToString());
                 LogMessage("ReadProfile", "Personality:          {0}", Personality.ToString());
             }
         }
@@ -1429,6 +1450,7 @@ namespace ASCOM.SonyMirrorless
                 driverProfile.WriteValue(driverID, readoutModeDefaultProfileName, defaultReadoutMode.ToString());
                 driverProfile.WriteValue(driverID, saveRawImageProfileName, SaveRawImageData.ToString());
                 driverProfile.WriteValue(driverID, useLiveviewProfileName, UseLiveview.ToString());
+                driverProfile.WriteValue(driverID, autoLiveviewProfileName, AutoLiveview.ToString());
                 driverProfile.WriteValue(driverID, personalityProfileName, Personality.ToString());
 
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
