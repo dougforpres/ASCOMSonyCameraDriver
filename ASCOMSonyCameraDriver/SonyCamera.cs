@@ -131,11 +131,12 @@ namespace ASCOM.SonyMirrorless
                 m_lastImage = null;
             }
 
-            // SharpCap seems to run really close to the limit... this might help, but may also affect performance
-            if (personality == PERSONALITY_NINA || personality == PERSONALITY_SHARPCAP)
-            {
-                GC.Collect();
-            }
+            // 32-bit apps tend to run close to the line of memory
+            // The auto garbage collection tends to fail when we're talking the large files
+            // a 60MP camera can deliver, and an attempt to allocate more than is available doesn't
+            // seem to trigger a collection - so we'll just do it here.
+            // TODO: Make this conditional on 32-bit execution
+            GC.Collect();
 
             info.Status = STATUS_EXPOSING;
             info.ImageMode = (uint)m_outputMode;
