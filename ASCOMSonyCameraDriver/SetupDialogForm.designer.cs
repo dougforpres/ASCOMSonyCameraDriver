@@ -77,7 +77,7 @@ namespace ASCOM.SonyMirrorless
             // 
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.cmdOK.Location = new System.Drawing.Point(1051, 843);
+            this.cmdOK.Location = new System.Drawing.Point(1051, 607);
             this.cmdOK.Margin = new System.Windows.Forms.Padding(6);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(118, 46);
@@ -90,7 +90,7 @@ namespace ASCOM.SonyMirrorless
             // 
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(921, 843);
+            this.cmdCancel.Location = new System.Drawing.Point(921, 607);
             this.cmdCancel.Margin = new System.Windows.Forms.Padding(6);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(118, 48);
@@ -235,7 +235,7 @@ namespace ASCOM.SonyMirrorless
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Location = new System.Drawing.Point(609, 17);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(486, 443);
+            this.groupBox3.Size = new System.Drawing.Size(486, 318);
             this.groupBox3.TabIndex = 17;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Camera Info";
@@ -349,7 +349,7 @@ namespace ASCOM.SonyMirrorless
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.chkTrace);
-            this.groupBox4.Location = new System.Drawing.Point(609, 480);
+            this.groupBox4.Location = new System.Drawing.Point(609, 478);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(486, 100);
             this.groupBox4.TabIndex = 18;
@@ -413,7 +413,7 @@ namespace ASCOM.SonyMirrorless
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.checkBoxAutoLiveview);
-            this.groupBox2.Location = new System.Drawing.Point(32, 616);
+            this.groupBox2.Location = new System.Drawing.Point(609, 358);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(541, 100);
             this.groupBox2.TabIndex = 20;
@@ -435,7 +435,7 @@ namespace ASCOM.SonyMirrorless
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1189, 906);
+            this.ClientSize = new System.Drawing.Size(1189, 670);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
