@@ -5,12 +5,13 @@
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
 AppName=ASCOM Sony Mirrorless Driver Camera Driver
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.16
-AppVersion=0.0.16
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.17
+AppVersion=0.0.17
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
+ArchitecturesInstallIn64BitMode=x64
 VersionInfoVersion=1.0.1
 MinVersion=0,6.0.2195sp4
 DefaultDirName="{commoncf}\ASCOM\Camera"
@@ -34,14 +35,23 @@ Name: "{commoncf}\ASCOM\Uninstall\Camera\Sony Mirrorless Driver"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
 Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\Sony Mirrorless Camera ReadMe.htm"; DestDir: "{app}"; Flags: isreadme
+
 ; TODO: Add other files needed by your driver here (add subfolders above)
-Source: "C:\Users\dougf\source\repos\SonyCamera\Release\libraw.dll"; DestDir: "{app}"
-Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyMTPCamera.dll"; DestDir: "{app}"
-Source: "C:\Users\dougf\source\repos\SonyCamera\Release\turbojpeg.dll"; DestDir: "{app}"
+; 32-bit files
+Source: "C:\Users\dougf\source\repos\SonyCamera\Release\libraw.dll"; DestDir: "{sys}"; Flags: 32bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 32bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 32bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyCameraInfo.exe"; DestDir: "{app}"
+
+; 64-bit files
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir: "{sys}"; Flags: 64bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit
+
+; AnyCPU files
+Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"
 
 ; Only if driver is .NET
 [Run]
