@@ -136,7 +136,10 @@ namespace ASCOM.SonyMirrorless
             // a 60MP camera can deliver, and an attempt to allocate more than is available doesn't
             // seem to trigger a collection - so we'll just do it here.
             // TODO: Make this conditional on 32-bit execution
-            GC.Collect();
+            if (!Environment.Is64BitProcess)
+            {
+                GC.Collect();
+            }
 
             info.Status = STATUS_EXPOSING;
             info.ImageMode = (uint)m_outputMode;
