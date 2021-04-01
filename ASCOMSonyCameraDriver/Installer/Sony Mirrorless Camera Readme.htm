@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE>Untitled Document</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.2  (Win32)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="Doug Henderson">
+	<META NAME="CHANGED" CONTENT="20191218;231400">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+		P { font-family: "Verdana", "Arial", "Helvetica", sans-serif; font-weight: normal }
+		TD P { font-family: "Verdana", "Arial", "Helvetica", sans-serif; font-weight: normal }
+		H3 { font-family: "Arial", "Helvetica", sans-serif }
+		H2 { font-family: "Arial", "Helvetica", sans-serif }
+		H4 { font-family: "Arial", "Helvetica", sans-serif }
+		TD P.note { background: #33ffff; font-family: "Verdana", "Arial", "Helvetica", sans-serif; font-weight: normal }
+		TD P.underline { font-family: "Verdana", "Arial", "Helvetica", sans-serif; font-weight: normal; text-decoration: underline }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-GB" DIR="LTR">
+    <TABLE WIDTH=100% BORDER=0 CELLPADDING=4 CELLSPACING=0>
+        <TR>
+            <TD>
+                <H2>Sony Mirrorless ASCOM Camera Driver (C#)</H2>
+            </TD>
+        </TR>
+    </TABLE>
+    <P>
+        <BR><BR>
+    </P>
+    <H3>Sony Mirrorless Camera ASCOM Driver</H3>
+    This is an ASCOM driver for Sony Mirrorless cameras.
+    The driver should actually work with any Sony camera that is supported by the <i>Sony Imaging Edge Remote</i> application.
+    <br />
+    Note that this driver was developed on Windows 10, with a Sony a6400 camera.  With the assistance of other Sony owners the driver now supports many Sony cameras.
+
+    <h4>More Information Available Online</h4>
+    The wiki for this project contains a list of currently supported cameras, some configuration hints for various AstroPhotography apps, help on troubleshooting, and other usful info.
+    <a href="https://github.com/dougforpres/ASCOMSonyCameraDriver/wiki">View to the Wiki on GitHub</a>.
+    <br />
+    To add support for your camera, please follow the instructions in the "Installation" section of the wiki.<br />
+
+    <h4>Setting up the camera in APT</h4>
+    <ul>
+        <li>
+            Connect Camera via USB in <b>PC Remote</b> mode as if you were connecting it to the <i>Imaging Edge Remote</i> app.
+        </li>
+        <li>
+            Click the <i>Connect</i> button in APT (or Shift-click if a camera is already configured).
+        </li>
+        <li>
+            Enable the <b>CCD</b> option and Choose <b>ASCOM Camera</b> from the drop-down list.
+        </li>
+        <li>
+            Ensure the <i>Color FITS preview (de-Bayer)</i> is checked if you want RAW camera data, or unchecked if you want processed RGB data.
+        </li>
+        <li>
+            Click OK, an ASCOM dialog will appear.
+        </li>
+        <li>
+            Select <b>Sony Mirrorless Camera</b> from the drop-down and click <b>Properties...</b> (if you click OK at this point it will fail).
+        </li>
+        <li>
+            The <i>Sony Mirrorless Setup</i> dialog will appear.
+        </li>
+        <li>
+            Choose your camera from the dropdown.
+        </li>
+        <li>
+            Set "Target Application" to APT.
+        </li>
+        <li>
+            Set "Image Output Format" to RGGB for RAW camera data, or RGB if you want processed RGB data (this should match the setting you chose in <i>Color FITS preview (de-bayer)</i> above)
+        </li>
+        <li>
+            If your camera supports LiveView, and you want faster/low-res preview images, check <i>Use LiveView for preview mode</i>.
+        </li>
+        <li>
+            (Optional) Check the <b>Trace On</b> checkbox if you want the driver to write logs (logs will be required for any support issues).
+        </li>
+        <li>
+            To have the raw image data from the camera saved to disk, check the appropriate box and enter the path to a directory you'd like to save the images to.  (No check is made to confirm this is a valid path, so do your own tests!)
+        </li>
+        <li>
+            Press OK to close the box, then OK again to close the ASCOM dialog.
+        </li>
+    </ul>
+    Your camera should now be connected - APT will remember the settings you chose and you'll only need to go through the setup steps if the driver is reinstalled/updated.
+    <br />
+
+    <hr />
+
+    <h4>Setting up your camera:</h4>
+    <ul>
+        <li>
+            Mode should be set to a mode that supports <i>BULB</i> shooting - <i>M</i> (manual) is probably best.
+        </li>
+        <li>
+            Exposure time should be set to <i>BULB</i> - if set to other than BULB the camera will still take shots, but it will ignore the exposure time requested by APT.
+            (a future version will attempt to set BULB mode automatically)
+        </li>
+        <li>
+            Currently all custom settings should be made on camera, APT currently has no control over ISO, Aperture, etc - in fact anything other than exposure time (in BULB mode).
+        </li>
+        <li>
+            Image storage mode should be set to <i>RAW</i> (or possibly <i>RAW + JPEG</i>).
+        </li>
+        <li>
+            For now, you should probably set your camera to save to camera + pc when in PC Remote mode (so you have access to the RAW data for editing).
+        </li>
+    </ul>
+
+    <hr />
+
+    <h4>APT Supported features:</h4>
+    <ul>
+        <li>
+            <b>Preview</b><br />Preview mode on the camera returns a low resolution JPEG encoded image to the driver.  This is decoded to an 8-bit per channel image and is displayed by APT.<br />
+            The preview image in APT represents the same image as shown on the camera display (w/o any annotations/overlay).  This can be useful when using digital-zoom feature for focus assist, etc.<br />
+            Note that when LiveView is enabled, the camera ignores shutter speed setting.  Setting a high ISO on the camera, and setting exposure time in APT to 0.000 will deliver better results (remember to re-set exposure time in APT when returning to normal shooting :) (I find this useful when using a bahtinov mask).
+        </li>
+        <li>
+            <b>Shoot</b><br />Assuming camera is set to <i>BULB</i> mode, APT will take a shot of required duration, convert it from Sony's ARW RAW format to RGGB or RGB, and present at full-resolution to APT.
+            If you chose RGGB and the debayer option in the camera-connect dialog the unprocessed RAW (RGGB) image will be saved to the FIT file (as monochrome).  It is up to you to manually debayer these images prior to processing.
+        </li>
+    </ul>
+
+    <hr />
+
+    <HR>
+    <DIV ALIGN=RIGHT>
+        <TABLE WIDTH=100% BORDER=0 CELLPADDING=4 CELLSPACING=0>
+            <TR>
+                <TD>
+                    <TABLE WIDTH=100% BORDER=0 CELLPADDING=4 CELLSPACING=0>
+                        <TR>
+                            <TD>
+                                <H3>ASCOM Initiative</H3>
+                            </TD>
+                            <TD>
+                                <IMG SRC="ASCOM.png" NAME="graphics1" ALIGN=RIGHT WIDTH=48 HEIGHT=56 BORDER=0>
+                            </TD>
+                        </TR>
+                    </TABLE>
+                    <P>
+                        <BR><BR>
+                    </P>
+                </TD>
+            </TR>
+            <TR>
+                <TD>
+                    <P>
+                        The ASCOM Initiative consists of a group of astronomy software
+                        developers and instrument vendors whose goals are to promote the
+                        driver/client model and scripting automation.
+                    </P>
+                    <P>
+                        See the <A HREF="http://ascom-standards.org/" TARGET="browser">
+                            ASCOM
+                            web site
+                        </A> for more information. Please participate in the
+                        <A HREF="http://tech.groups.yahoo.com/group/ASCOM-Talk" TARGET="browser">
+                            ASCOM-Talk
+                            Yahoo Group
+                        </A>.
+                    </P>
+                </TD>
+            </TR>
+        </TABLE>
+    </DIV>
+    <P>
+        <BR><BR>
+    </P><P>
+        <BR><BR>
+    </P>
+</BODY>
+</HTML>

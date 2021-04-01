@@ -68,8 +68,6 @@ namespace ASCOM.SonyMirrorless
         internal static string cameraDefault = "";
         internal static string readoutModeDefaultProfileName = "Readout Mode";
         internal static string readoutModeDefault = "0";
-        internal static string saveRawImageProfileName = "Save Raw Image";
-        internal static string saveRawImageDefault = "false";
         internal static string useLiveviewProfileName = "Use Camera Liveview";
         internal static string useLiveviewDefault = "true";
         internal static string autoLiveviewProfileName = "Auto Liveview";
@@ -260,8 +258,8 @@ namespace ASCOM.SonyMirrorless
                                 LogMessage("connected", "Found info... creating camera obj", "");
                                 camera = candidate;
                                 camera.Logger = tl;
-                                cameraNumX = (int)camera.Info.ImageWidthPixels;
-                                cameraNumY = (int)camera.Info.ImageHeightPixels;
+                                cameraNumX = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
+                                cameraNumY = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
 
                                 switch (defaultReadoutMode)
                                 {
@@ -280,7 +278,7 @@ namespace ASCOM.SonyMirrorless
 
                 if (camera != null)
                 {
-                    tl.LogMessage("Connected", "Set {0}", value);
+                    LogMessage("Connected", "Set {0}", value);
 
                     if (value == camera.Connected)
                         return;
@@ -490,9 +488,10 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CameraXSize", true))
                 {
-                    tl.LogMessage("CameraXSize Get", camera.Info.ImageWidthPixels.ToString());
+                    int x = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
+                    tl.LogMessage("CameraXSize Get", x.ToString());
 
-                    return (int)camera.Info.ImageWidthPixels;
+                    return x;
                 }
             }
         }
@@ -503,9 +502,10 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CameraYSize", true))
                 {
-                    tl.LogMessage("CameraYSize Get", camera.Info.ImageHeightPixels.ToString());
+                    int y = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
+                    tl.LogMessage("CameraYSize Get", y.ToString());
 
-                    return (int)camera.Info.ImageHeightPixels;
+                    return y;
                 }
             }
         }
@@ -1007,8 +1007,10 @@ namespace ASCOM.SonyMirrorless
                         x = camera.LastImage.Width;
                     }
 
+                    x = (int)Math.Min(cameraNumX, x);
+
                     tl.LogMessage("NumX Get", x.ToString());
-                    return (int)Math.Min(cameraNumX, x);
+                    return x;
                 }
             }
             set
@@ -1034,8 +1036,10 @@ namespace ASCOM.SonyMirrorless
                         y = camera.LastImage.Height;
                     }
 
+                    y = (int)Math.Min(cameraNumY, y);
+
                     tl.LogMessage("NumY Get", y.ToString());
-                    return (int)Math.Min(cameraNumY, y);
+                    return y;
                 }
             }
             set
@@ -1417,7 +1421,6 @@ namespace ASCOM.SonyMirrorless
                 tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
                 deviceId = driverProfile.GetValue(driverID, cameraProfileName, string.Empty, cameraDefault);
                 defaultReadoutMode = Convert.ToInt16(driverProfile.GetValue(driverID, readoutModeDefaultProfileName, string.Empty, readoutModeDefault));
-                SaveRawImageData = Convert.ToBoolean(driverProfile.GetValue(driverID, saveRawImageProfileName, string.Empty, saveRawImageDefault));
                 UseLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, useLiveviewProfileName, string.Empty, useLiveviewDefault));
                 Personality = Convert.ToInt16(driverProfile.GetValue(driverID, personalityProfileName, string.Empty, personalityDefault));
                 AutoLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, autoLiveviewProfileName, string.Empty, autoLiveviewDefault));
@@ -1428,10 +1431,13 @@ namespace ASCOM.SonyMirrorless
                 }
 
                 // This needs to actually save to registry
+                SaveRawImageData = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", "0"));
                 SaveRawImageFolder = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", "");
+
                 LogMessage("ReadProfile", "DeviceID:             {0}", deviceId);
                 LogMessage("ReadProfile", "Default Readout Mode: {0}", defaultReadoutMode.ToString());
                 LogMessage("ReadProfile", "Save Raw files:       {0}", SaveRawImageData.ToString());
+                LogMessage("ReadProfile", "Save Raw files Path:  {0}", SaveRawImageFolder);
                 LogMessage("ReadProfile", "Use Liveview:         {0}", UseLiveview.ToString());
                 LogMessage("ReadProfile", "AutoLiveview @ 0.0s:  {0}", AutoLiveview.ToString());
                 LogMessage("ReadProfile", "Personality:          {0}", Personality.ToString());
@@ -1448,11 +1454,11 @@ namespace ASCOM.SonyMirrorless
                 driverProfile.DeviceType = "Camera";
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
                 driverProfile.WriteValue(driverID, readoutModeDefaultProfileName, defaultReadoutMode.ToString());
-                driverProfile.WriteValue(driverID, saveRawImageProfileName, SaveRawImageData.ToString());
                 driverProfile.WriteValue(driverID, useLiveviewProfileName, UseLiveview.ToString());
                 driverProfile.WriteValue(driverID, autoLiveviewProfileName, AutoLiveview.ToString());
                 driverProfile.WriteValue(driverID, personalityProfileName, Personality.ToString());
 
+                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
 
                 if (deviceId != null)
@@ -1547,16 +1553,16 @@ namespace ASCOM.SonyMirrorless
 
                 if (!serialAccess.WaitOne(1000))
                 {
-                    LogMessage(m_method, "Waiting to enter");
+//                    LogMessage(m_method, "Waiting to enter");
                     serialAccess.WaitOne();
                 }
 
-                LogMessage(m_method, "[in]");
+//                LogMessage(m_method, "[in]");
             }
 
             public void Dispose()
             {
-                LogMessage(m_method, "[out]");
+//                LogMessage(m_method, "[out]");
                 serialAccess.ReleaseMutex();
             }
         }

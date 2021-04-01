@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Doug Henderson")]
 [assembly: AssemblyProduct("ASCOM Camera driver for Sony Mirrorless")]
-[assembly: AssemblyCopyright("Driver Copyright © 2019-2020 D. Henderson")]
+[assembly: AssemblyCopyright("Driver Copyright © 2019-2021 D. Henderson")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("6.4.0.18")]
-[assembly: AssemblyFileVersion("6.4.0.18")]
+[assembly: AssemblyVersion("6.4.0.24")]
+[assembly: AssemblyFileVersion("6.4.0.24")]

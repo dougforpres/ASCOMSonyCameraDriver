@@ -39,8 +39,11 @@ namespace ASCOM.SonyMirrorless
             public UInt32 Version;
             public UInt32 ImageWidthPixels;
             public UInt32 ImageHeightPixels;
+            public UInt32 ImageWidthCroppedPixels;
+            public UInt32 ImageHeightCroppedPixels;
             public UInt32 BayerXOffset;
             public UInt32 BayerYOffset;
+            public UInt32 CropMode;
             public Double ExposureTimeMin;
             public Double ExposureTimeMax;
             public Double ExposureTimeStep;
@@ -74,6 +77,8 @@ namespace ASCOM.SonyMirrorless
             public UInt32 CameraFlags;
             public UInt32 ImageWidthPixels;
             public UInt32 ImageHeightPixels;
+            public UInt32 ImageWidthCroppedPixels;
+            public UInt32 ImageHeightCroppedPixels;
             public UInt32 PreviewWidthPixels;
             public UInt32 PreviewHeightPixels;
             public UInt32 BayerXOffset;

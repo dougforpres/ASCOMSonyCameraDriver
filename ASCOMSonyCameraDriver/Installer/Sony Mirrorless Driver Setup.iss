@@ -4,9 +4,9 @@
 ;
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
-AppName=ASCOM Sony Mirrorless Driver Camera Driver
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.18
-AppVersion=0.0.18
+AppName=ASCOM Sony Mirrorless Driver Camera Driver         
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.24
+AppVersion=0.0.24
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
@@ -43,12 +43,14 @@ Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\libraw.dll"; DestDir: "{sys}"; Flags: 32bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 32bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 32bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 32bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyCameraInfo.exe"; DestDir: "{app}"
 
 ; 64-bit files
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir: "{sys}"; Flags: 64bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 64bit
 
 ; AnyCPU files
 Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"

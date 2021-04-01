@@ -39,8 +39,9 @@ namespace ASCOM.SonyMirrorless
             m_info = info;
             m_mode = new CaptureMode();
             m_resolutions = new CameraInfo();
-            m_mode.ImageWidthPixels = m_info.ImageWidthPixels;
-            m_mode.ImageHeightPixels = m_info.ImageHeightPixels;
+
+            m_mode.ImageWidthPixels = m_info.CropMode == 0 ? m_info.ImageWidthPixels : m_info.ImageWidthCroppedPixels;
+            m_mode.ImageHeightPixels = m_info.CropMode == 0 ? m_info.ImageHeightPixels : m_info.ImageHeightCroppedPixels;
         }
 
         public TraceLogger Logger
@@ -241,8 +242,8 @@ namespace ASCOM.SonyMirrorless
 
                     if (!Mode.Preview)
                     {
-                        Mode.ImageWidthPixels = m_resolutions.ImageWidthPixels;
-                        Mode.ImageHeightPixels = m_resolutions.ImageHeightPixels;
+                        Mode.ImageWidthPixels = m_info.CropMode == 0 ? m_resolutions.ImageWidthPixels : m_resolutions.ImageWidthCroppedPixels;
+                        Mode.ImageHeightPixels = m_info.CropMode == 0 ? m_resolutions.ImageHeightPixels : m_resolutions.ImageHeightCroppedPixels;
                     }
                     else
                     {
