@@ -36,7 +36,7 @@ namespace ASCOM.SonyMirrorless
             Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
             Camera.BulbModeEnable = checkBoxBulbMode.Checked;
-            Camera.BulbModeTime = short.Parse(textBoxBulbMode.Text);
+            Camera.BulbModeTime = short.Parse(textBoxBulbMode.Text.Trim());
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -103,6 +103,10 @@ namespace ASCOM.SonyMirrorless
             comboBoxPersonality.ValueMember = "Key";
 
             comboBoxPersonality.SelectedValue = Camera.Personality;
+
+            checkBoxBulbMode.Checked = Camera.BulbModeEnable;
+            textBoxBulbMode.Text = Camera.BulbModeTime.ToString();
+            textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
 
             PopulateOutputFormats();
 
@@ -246,7 +250,16 @@ namespace ASCOM.SonyMirrorless
         private void textBoxBulbMode_Validating(object sender, CancelEventArgs e)
         {
             // Lowest possible value is 1, highest is 30
-            int value = short.Parse(textBoxBulbMode.Text);
+            int value = -1;
+
+            try
+            {
+                value = short.Parse(textBoxBulbMode.Text.Trim());
+            }
+            catch
+            {
+                // Value already invalid
+            }
 
             if (value < 1 || value > 30)
             {

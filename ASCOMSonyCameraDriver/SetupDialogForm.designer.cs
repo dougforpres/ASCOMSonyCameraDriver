@@ -61,7 +61,6 @@ namespace ASCOM.SonyMirrorless
             this.selectCameraTab = new System.Windows.Forms.TabPage();
             this.cameraPersonalityTab = new System.Windows.Forms.TabPage();
             this.driverSettingsTab = new System.Windows.Forms.TabPage();
-            this.textBoxBulbMode = new System.Windows.Forms.MaskedTextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
             this.cameraInfoTab = new System.Windows.Forms.TabPage();
@@ -71,6 +70,7 @@ namespace ASCOM.SonyMirrorless
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
+            this.textBoxBulbMode = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -389,16 +389,6 @@ namespace ASCOM.SonyMirrorless
             this.driverSettingsTab.Text = "Driver Settings";
             this.driverSettingsTab.UseVisualStyleBackColor = true;
             // 
-            // textBoxBulbMode
-            // 
-            this.textBoxBulbMode.Location = new System.Drawing.Point(511, 71);
-            this.textBoxBulbMode.Mask = "99";
-            this.textBoxBulbMode.Name = "textBoxBulbMode";
-            this.textBoxBulbMode.Size = new System.Drawing.Size(48, 31);
-            this.textBoxBulbMode.TabIndex = 4;
-            this.textBoxBulbMode.ValidatingType = typeof(int);
-            this.textBoxBulbMode.Validating += new System.ComponentModel.CancelEventHandler(this.textBoxBulbMode_Validating);
-            // 
             // label10
             // 
             this.label10.AutoSize = true;
@@ -505,6 +495,15 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation.UseVisualStyleBackColor = true;
             this.checkBoxEnableSaveLocation.CheckedChanged += new System.EventHandler(this.checkBoxEnableSaveLocation_CheckedChanged);
             // 
+            // textBoxBulbMode
+            // 
+            this.textBoxBulbMode.Location = new System.Drawing.Point(516, 71);
+            this.textBoxBulbMode.MaxLength = 2;
+            this.textBoxBulbMode.Name = "textBoxBulbMode";
+            this.textBoxBulbMode.Size = new System.Drawing.Size(44, 31);
+            this.textBoxBulbMode.TabIndex = 3;
+            this.textBoxBulbMode.Validating += new System.ComponentModel.CancelEventHandler(this.textBoxBulbMode_Validating);
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -581,6 +580,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.TabPage driverSettingsTab;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckBox checkBoxBulbMode;
-        private System.Windows.Forms.MaskedTextBox textBoxBulbMode;
+        private System.Windows.Forms.TextBox textBoxBulbMode;
     }
 }
