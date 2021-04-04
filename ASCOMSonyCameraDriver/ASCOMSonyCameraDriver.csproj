@@ -114,6 +114,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Warning.png" />
     <None Include="app.config" />
     <None Include="ASCOM.png" />
     <None Include="ASCOMDriverTemplate.snk" />
@@ -124,6 +125,7 @@
     <Content Include="ASCOM.ico" />
     <Content Include="Installer\Sony Mirrorless Driver Setup.iss" />
     <Content Include="License Info.txt" />
+    <Content Include="Resources\Warning.png" />
     <Content Include="Sony Mirrorless Camera Readme.htm" />
     <None Include="Resources\ASCOM.bmp" />
   </ItemGroup>

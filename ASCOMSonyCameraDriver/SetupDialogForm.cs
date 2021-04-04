@@ -35,6 +35,8 @@ namespace ASCOM.SonyMirrorless
             Camera.UseLiveview = checkBoxUseLiveview.Checked;
             Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
+            Camera.BulbModeEnable = checkBoxBulbMode.Checked;
+            Camera.BulbModeTime = short.Parse(textBoxBulbMode.Text);
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -127,6 +129,7 @@ namespace ASCOM.SonyMirrorless
                     textBoxCameraExposureTime.Text = camera.GetPropertyValue(0xd20d).Text;
                     textBoxCameraISO.Text = camera.GetPropertyValue(0xd21e).Text;
                     textBoxCameraBatteryLevel.Text = camera.GetPropertyValue(0xd218).Text;
+                    modeWarning.Visible = textBoxCameraMode.Text != "M";
                 }
                 else
                 {
@@ -135,6 +138,7 @@ namespace ASCOM.SonyMirrorless
                     textBoxCameraExposureTime.Text = "-";
                     textBoxCameraISO.Text = "-";
                     textBoxCameraBatteryLevel.Text = "-";
+                    modeWarning.Visible = false;
                 }
             }
             else
@@ -237,6 +241,23 @@ namespace ASCOM.SonyMirrorless
             {
                 MessageBox.Show("Please note that this feature is experimental.\n\nThis will automatically take a LiveView image instead of a normal exposure if:\n  - The camera supports it\n  - The exposure time is set to less than\n    or equal to 0.00001s (in APT this is\n    represented as 0.000)");
             }
+        }
+
+        private void textBoxBulbMode_Validating(object sender, CancelEventArgs e)
+        {
+            // Lowest possible value is 1, highest is 30
+            int value = short.Parse(textBoxBulbMode.Text);
+
+            if (value < 1 || value > 30)
+            {
+                e.Cancel = true;
+                MessageBox.Show("Value for Bulb Mode must be a number from 1 to 30");
+            }
+        }
+
+        private void checkBoxBulbMode_CheckedChanged(object sender, EventArgs e)
+        {
+            textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
         }
     }
 }

@@ -155,6 +155,9 @@ namespace ASCOM.SonyMirrorless
         protected static extern UInt32 GetSinglePropertyValue(UInt32 hCamera, UInt32 propertyId, ref PropertyValue value);
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        protected static extern UInt32 GetAllPropertyValues(UInt32 hCamers, ref PropertyValue[] values, ref UInt32 count);
+        protected static extern UInt32 GetAllPropertyValues(UInt32 hCamera, ref PropertyValue[] values, ref UInt32 count);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 SetExposureTime(UInt32 hCamera, float exposureTime, ref PropertyValue valueOut);
     }
 }

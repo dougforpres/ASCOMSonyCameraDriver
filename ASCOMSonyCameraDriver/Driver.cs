@@ -74,6 +74,10 @@ namespace ASCOM.SonyMirrorless
         internal static string autoLiveviewDefault = "false";
         internal static string personalityProfileName = "Personality";
         internal static string personalityDefault = "1";
+        internal static string bulbModeEnableProfileName = "Bulb Mode Enable";
+        internal static string bulbModeEnableDefault = "true";
+        internal static string bulbModeTimeProfileName = "Bulb Mode Time";
+        internal static string bulbModeTimeDefault = "1";
 
         internal static string deviceId; // Variables to hold the currrent device configuration
 
@@ -103,6 +107,8 @@ namespace ASCOM.SonyMirrorless
         internal static bool UseLiveview = false;
         internal static bool AutoLiveview = false;
         internal static int Personality = SonyCommon.PERSONALITY_APT;
+        internal static bool BulbModeEnable = false;
+        internal static short BulbModeTime = 1;
 
         internal static bool LastSetFastReadout = false;
         internal static Mutex serialAccess;
@@ -149,6 +155,13 @@ namespace ASCOM.SonyMirrorless
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
                     WriteProfile(); // Persist device configuration values to the ASCOM Profile store
+
+                    // Update connected camera with bulb mode info
+                    if (camera != null)
+                    {
+                        camera.BulbMode = BulbModeEnable;
+                        camera.BulbModeTime = BulbModeTime;
+                    }
                 }
             }
         }
@@ -271,6 +284,9 @@ namespace ASCOM.SonyMirrorless
                                         camera.OutputMode = SonyCamera.ImageMode.RGGB;
                                         break;
                                 }
+
+                                camera.BulbMode = BulbModeEnable;
+                                camera.BulbModeTime = BulbModeTime;
                             }
                         }
                     }
@@ -1424,6 +1440,8 @@ namespace ASCOM.SonyMirrorless
                 UseLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, useLiveviewProfileName, string.Empty, useLiveviewDefault));
                 Personality = Convert.ToInt16(driverProfile.GetValue(driverID, personalityProfileName, string.Empty, personalityDefault));
                 AutoLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, autoLiveviewProfileName, string.Empty, autoLiveviewDefault));
+                BulbModeEnable = Convert.ToBoolean(driverProfile.GetValue(driverID, bulbModeEnableProfileName, string.Empty, bulbModeEnableDefault));
+                BulbModeTime = Convert.ToInt16(driverProfile.GetValue(driverID, bulbModeTimeProfileName, string.Empty, bulbModeTimeDefault));
 
                 if (defaultReadoutMode == 0)
                 {
@@ -1441,6 +1459,8 @@ namespace ASCOM.SonyMirrorless
                 LogMessage("ReadProfile", "Use Liveview:         {0}", UseLiveview.ToString());
                 LogMessage("ReadProfile", "AutoLiveview @ 0.0s:  {0}", AutoLiveview.ToString());
                 LogMessage("ReadProfile", "Personality:          {0}", Personality.ToString());
+                LogMessage("ReadProfile", "Bulb Mode Enable:     {0}", BulbModeEnable.ToString());
+                LogMessage("ReadProfile", "Bulb Mode Time:       {0}", BulbModeTime.ToString());
             }
         }
 
@@ -1457,6 +1477,8 @@ namespace ASCOM.SonyMirrorless
                 driverProfile.WriteValue(driverID, useLiveviewProfileName, UseLiveview.ToString());
                 driverProfile.WriteValue(driverID, autoLiveviewProfileName, AutoLiveview.ToString());
                 driverProfile.WriteValue(driverID, personalityProfileName, Personality.ToString());
+                driverProfile.WriteValue(driverID, bulbModeEnableProfileName, BulbModeEnable.ToString());
+                driverProfile.WriteValue(driverID, bulbModeTimeProfileName, BulbModeTime.ToString());
 
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);

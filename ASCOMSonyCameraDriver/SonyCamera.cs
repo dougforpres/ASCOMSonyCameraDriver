@@ -20,6 +20,8 @@ namespace ASCOM.SonyMirrorless
         internal CameraInfo m_resolutions;
         internal Dictionary<UInt32, CameraProperty> m_properties = new Dictionary<UInt32, CameraProperty>();
         internal TraceLogger m_logger = null;
+        internal Boolean m_bulbMode = false;
+        internal short m_bulbModeTime = 1;
 
         public enum ImageMode
         {
@@ -78,6 +80,32 @@ namespace ASCOM.SonyMirrorless
 
                     m_handle = INVALID_HANDLE_VALUE;
                 }
+            }
+        }
+
+        public Boolean BulbMode
+        {
+            get
+            {
+                return m_bulbMode;
+            }
+
+            set
+            {
+                m_bulbMode = value;
+            }
+        }
+
+        public short BulbModeTime
+        {
+            get
+            {
+                return m_bulbModeTime;
+            }
+
+            set
+            {
+                m_bulbModeTime = value;
             }
         }
 
@@ -154,6 +182,12 @@ namespace ASCOM.SonyMirrorless
             }
             else
             {
+                if (m_bulbMode)
+                {
+                    PropertyValue pv = new PropertyValue();
+                    SetExposureTime(m_handle, (float)(duration > m_bulbModeTime ? 0 : duration), ref pv);
+                }
+
                 StartCapture(m_handle, ref info);
                 m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
             }
