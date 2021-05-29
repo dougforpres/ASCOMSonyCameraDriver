@@ -24,5 +24,21 @@ namespace ASCOM.SonyMirrorless
 
             return v;
         }
+
+        public PropertyDescriptor Descriptor
+        {
+            get
+            {
+                return m_descriptor;
+            }
+        }
+
+        public PropertyValueOption[] Options
+        {
+            get
+            {
+                return m_options;
+            }
+        }
     }
 }

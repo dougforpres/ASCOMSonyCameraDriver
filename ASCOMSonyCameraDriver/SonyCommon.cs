@@ -31,6 +31,9 @@ namespace ASCOM.SonyMirrorless
         public const short OUTPUTFORMAT_BGR = OUTPUTFORMAT_RGB | 0x1000;
         public const short OUTPUTFORMAT_RGGB = (short)IMAGEMODE_RAW;
 
+        public const UInt16 PROPERTY_ISO = 0xd21e;
+        public const UInt16 PROPERTY_ISO_OPTIONS = 0xfffe;
+
         protected const UInt32 CAMERA_SUPPORTS_LIVEVIEW = 0x00000001;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -149,7 +152,7 @@ namespace ASCOM.SonyMirrorless
         protected static extern UInt32 GetPropertyDescriptor(UInt32 hCamera, UInt32 propertyId, ref PropertyDescriptor descriptor);
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        protected static extern UInt32 GetPropertyValueOptions(UInt32 hCamera, UInt32 propertyId, ref PropertyValueOption[] descriptor, ref UInt32 count);
+        protected static extern UInt32 GetPropertyValueOption(UInt32 hCamera, UInt32 propertyId, ref PropertyValueOption option, UInt32 index);
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 GetSinglePropertyValue(UInt32 hCamera, UInt32 propertyId, ref PropertyValue value);
@@ -159,5 +162,8 @@ namespace ASCOM.SonyMirrorless
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 SetExposureTime(UInt32 hCamera, float exposureTime, ref PropertyValue valueOut);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 SetPropertyValue(UInt32 hCamera, UInt32 propertyId, UInt32 value);
     }
 }

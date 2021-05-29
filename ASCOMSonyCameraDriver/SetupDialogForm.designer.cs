@@ -61,6 +61,8 @@ namespace ASCOM.SonyMirrorless
             this.selectCameraTab = new System.Windows.Forms.TabPage();
             this.cameraPersonalityTab = new System.Windows.Forms.TabPage();
             this.driverSettingsTab = new System.Windows.Forms.TabPage();
+            this.checkBoxAllowISOAdjust = new System.Windows.Forms.CheckBox();
+            this.textBoxBulbMode = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
             this.cameraInfoTab = new System.Windows.Forms.TabPage();
@@ -70,7 +72,8 @@ namespace ASCOM.SonyMirrorless
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
-            this.textBoxBulbMode = new System.Windows.Forms.TextBox();
+            this.linkExposureAndISO = new System.Windows.Forms.LinkLabel();
+            this.linkWiki = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -350,6 +353,7 @@ namespace ASCOM.SonyMirrorless
             // 
             // selectCameraTab
             // 
+            this.selectCameraTab.Controls.Add(this.linkWiki);
             this.selectCameraTab.Controls.Add(this.comboBoxCamera);
             this.selectCameraTab.Controls.Add(this.label1);
             this.selectCameraTab.Controls.Add(this.label2);
@@ -378,6 +382,8 @@ namespace ASCOM.SonyMirrorless
             // 
             // driverSettingsTab
             // 
+            this.driverSettingsTab.Controls.Add(this.linkExposureAndISO);
+            this.driverSettingsTab.Controls.Add(this.checkBoxAllowISOAdjust);
             this.driverSettingsTab.Controls.Add(this.textBoxBulbMode);
             this.driverSettingsTab.Controls.Add(this.label10);
             this.driverSettingsTab.Controls.Add(this.checkBoxBulbMode);
@@ -388,6 +394,26 @@ namespace ASCOM.SonyMirrorless
             this.driverSettingsTab.TabIndex = 4;
             this.driverSettingsTab.Text = "Driver Settings";
             this.driverSettingsTab.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxAllowISOAdjust
+            // 
+            this.checkBoxAllowISOAdjust.AutoSize = true;
+            this.checkBoxAllowISOAdjust.Location = new System.Drawing.Point(16, 119);
+            this.checkBoxAllowISOAdjust.Name = "checkBoxAllowISOAdjust";
+            this.checkBoxAllowISOAdjust.Size = new System.Drawing.Size(571, 29);
+            this.checkBoxAllowISOAdjust.TabIndex = 4;
+            this.checkBoxAllowISOAdjust.Text = "Allow applications to adjust ISO setting via Gain control";
+            this.checkBoxAllowISOAdjust.UseVisualStyleBackColor = true;
+            this.checkBoxAllowISOAdjust.CheckedChanged += new System.EventHandler(this.checkBoxAllowISOAdjust_CheckedChanged);
+            // 
+            // textBoxBulbMode
+            // 
+            this.textBoxBulbMode.Location = new System.Drawing.Point(516, 71);
+            this.textBoxBulbMode.MaxLength = 2;
+            this.textBoxBulbMode.Name = "textBoxBulbMode";
+            this.textBoxBulbMode.Size = new System.Drawing.Size(44, 31);
+            this.textBoxBulbMode.TabIndex = 3;
+            this.textBoxBulbMode.Validating += new System.ComponentModel.CancelEventHandler(this.textBoxBulbMode_Validating);
             // 
             // label10
             // 
@@ -495,14 +521,27 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation.UseVisualStyleBackColor = true;
             this.checkBoxEnableSaveLocation.CheckedChanged += new System.EventHandler(this.checkBoxEnableSaveLocation_CheckedChanged);
             // 
-            // textBoxBulbMode
+            // linkExposureAndISO
             // 
-            this.textBoxBulbMode.Location = new System.Drawing.Point(516, 71);
-            this.textBoxBulbMode.MaxLength = 2;
-            this.textBoxBulbMode.Name = "textBoxBulbMode";
-            this.textBoxBulbMode.Size = new System.Drawing.Size(44, 31);
-            this.textBoxBulbMode.TabIndex = 3;
-            this.textBoxBulbMode.Validating += new System.ComponentModel.CancelEventHandler(this.textBoxBulbMode_Validating);
+            this.linkExposureAndISO.AutoSize = true;
+            this.linkExposureAndISO.Location = new System.Drawing.Point(16, 343);
+            this.linkExposureAndISO.Name = "linkExposureAndISO";
+            this.linkExposureAndISO.Size = new System.Drawing.Size(338, 25);
+            this.linkExposureAndISO.TabIndex = 5;
+            this.linkExposureAndISO.TabStop = true;
+            this.linkExposureAndISO.Text = "Wiki Link: ISO and Exposure Time";
+            this.linkExposureAndISO.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkWiki_LinkClicked);
+            // 
+            // linkWiki
+            // 
+            this.linkWiki.AutoSize = true;
+            this.linkWiki.Location = new System.Drawing.Point(21, 343);
+            this.linkWiki.Name = "linkWiki";
+            this.linkWiki.Size = new System.Drawing.Size(437, 25);
+            this.linkWiki.TabIndex = 6;
+            this.linkWiki.TabStop = true;
+            this.linkWiki.Text = "Wiki Link: Installation, Troubleshooting, Help";
+            this.linkWiki.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
             // SetupDialogForm
             // 
@@ -581,5 +620,8 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckBox checkBoxBulbMode;
         private System.Windows.Forms.TextBox textBoxBulbMode;
+        private System.Windows.Forms.CheckBox checkBoxAllowISOAdjust;
+        private System.Windows.Forms.LinkLabel linkExposureAndISO;
+        private System.Windows.Forms.LinkLabel linkWiki;
     }
 }

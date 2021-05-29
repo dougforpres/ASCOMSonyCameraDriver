@@ -5,8 +5,8 @@
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
 AppName=ASCOM Sony Mirrorless Driver Camera Driver         
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.25
-AppVersion=0.0.25
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.29
+AppVersion=0.0.29
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
@@ -47,13 +47,15 @@ Source: "C:\Users\dougf\source\repos\SonyCamera\Release\libusbK.dll"; DestDir: "
 Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyCameraInfo.exe"; DestDir: "{app}"
 
 ; 64-bit files
-Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir: "{sys}"; Flags: 64bit
-Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit
-Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit
-Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 64bit
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
 
 ; AnyCPU files
 Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"
+
+;#include "VCRedistNeedsInstall.iss"
 
 ; Only if driver is .NET
 [Run]
@@ -71,9 +73,6 @@ Filename: "{dotnet4032}\regasm.exe"; Parameters: "-u ""{app}\ASCOM.SonyMirrorles
 ; This helps to give a clean uninstall
 Filename: "{dotnet4064}\regasm.exe"; Parameters: "/codebase ""{app}\ASCOM.SonyMirrorless.Camera.dll"""; Flags: runhidden 64bit; Check: IsWin64
 Filename: "{dotnet4064}\regasm.exe"; Parameters: "-u ""{app}\ASCOM.SonyMirrorless.Camera.dll"""; Flags: runhidden 64bit; Check: IsWin64
-
-
-
 
 [Code]
 const

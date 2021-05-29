@@ -37,6 +37,7 @@ namespace ASCOM.SonyMirrorless
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
             Camera.BulbModeEnable = checkBoxBulbMode.Checked;
             Camera.BulbModeTime = short.Parse(textBoxBulbMode.Text.Trim());
+            Camera.AllowISOAdjust = checkBoxAllowISOAdjust.Checked;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -107,6 +108,8 @@ namespace ASCOM.SonyMirrorless
             checkBoxBulbMode.Checked = Camera.BulbModeEnable;
             textBoxBulbMode.Text = Camera.BulbModeTime.ToString();
             textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
+
+            checkBoxAllowISOAdjust.Checked = Camera.AllowISOAdjust;
 
             PopulateOutputFormats();
 
@@ -270,7 +273,55 @@ namespace ASCOM.SonyMirrorless
 
         private void checkBoxBulbMode_CheckedChanged(object sender, EventArgs e)
         {
-            textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
+            if (!InInit)
+            {
+                textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
+                MessageBox.Show("Note that this option will only take effect if your camera's list of supported Exposure times is known.  See the wiki page at the bottom of the settings page for more info.");
+            }
+        }
+
+        private void checkBoxAllowISOAdjust_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!InInit)
+            {
+                MessageBox.Show("Note that this option will only take effect if your camera's list of supported ISO values is known.  See the wiki page at the bottom of the settings page for more info.");
+            }
+        }
+
+        private void linkWiki_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try
+            {
+                // Change the color of the link text by setting LinkVisited
+                // to true.
+                linkExposureAndISO.LinkVisited = true;
+
+                //Call the Process.Start method to open the default browser
+                //with a URL:
+                System.Diagnostics.Process.Start("https://github.com/dougforpres/ASCOMSonyCameraDriver/wiki/Controlling-the-Exposure-Time-and-ISO-(Gain)");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to open link that was clicked.");
+            }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            try
+            {
+                // Change the color of the link text by setting LinkVisited
+                // to true.
+                linkWiki.LinkVisited = true;
+
+                //Call the Process.Start method to open the default browser
+                //with a URL:
+                System.Diagnostics.Process.Start("https://github.com/dougforpres/ASCOMSonyCameraDriver/wiki/");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to open link that was clicked.");
+            }
         }
     }
 }

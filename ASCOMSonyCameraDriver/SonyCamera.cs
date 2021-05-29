@@ -22,6 +22,8 @@ namespace ASCOM.SonyMirrorless
         internal TraceLogger m_logger = null;
         internal Boolean m_bulbMode = false;
         internal short m_bulbModeTime = 1;
+        internal short m_desiredGain = -1;
+        private ArrayList m_gains = new ArrayList();
 
         public enum ImageMode
         {
@@ -188,6 +190,11 @@ namespace ASCOM.SonyMirrorless
                     SetExposureTime(m_handle, (float)(duration > m_bulbModeTime ? 0 : duration), ref pv);
                 }
 
+                if (m_desiredGain != -1 && Gains.Count > 0)
+                {
+                    SetPropertyValue(m_handle, SonyCommon.PROPERTY_ISO, UInt32.Parse((string)Gains[m_desiredGain]));
+                }
+
                 StartCapture(m_handle, ref info);
                 m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
             }
@@ -309,6 +316,54 @@ namespace ASCOM.SonyMirrorless
             }
         }
 
+        public ArrayList Gains
+        {
+            get
+            {
+                if (m_gains.Count == 0)
+                {
+                    CameraProperty iso = GetProperty(SonyCommon.PROPERTY_ISO_OPTIONS);
+
+                    SonyCommon.PropertyValueOption[] options = iso.Options;
+
+                    foreach (SonyCommon.PropertyValueOption option in options)
+                    {
+                        // Unsure what the top-byte-set values are for, so filter them out
+                        // 0x00ffffff = auto
+                        if ((option.Value & 0xff000000) == 0)
+                        {
+                            m_gains.Add(option.Value.ToString());
+                        }
+                    }
+
+                }
+
+                return m_gains;
+            }
+        }
+
+        public short GainIndex
+        {
+            get
+            {
+                RefreshProperties();
+
+                CameraProperty iso = GetProperty(SonyCommon.PROPERTY_ISO);
+
+                UInt32 value = iso.CurrentValue(m_handle).Value;
+
+                return (short)Gains.IndexOf(value.ToString());
+            }
+
+            set
+            {
+                if (value >= 0 && value < Gains.Count)
+                {
+                    m_desiredGain = value;
+                }
+            }
+        }
+
         private void PopulatePropertyInfo()
         {
             if (m_properties.Count == 0)
@@ -336,10 +391,11 @@ namespace ASCOM.SonyMirrorless
 
                     PropertyValueOption[] options = new PropertyValueOption[descriptor.ValueCount];
 
-                    if (descriptor.ValueCount > 0)
+                    for (uint index = 0; index < descriptor.ValueCount; index++)
                     {
-                        UInt32 countReturned = descriptor.ValueCount;
-                        GetPropertyValueOptions(m_handle, descriptor.Id, ref options, ref countReturned);
+                        GetPropertyValueOption(m_handle, descriptor.Id, ref options[index], index);
+//                        UInt32 countReturned = descriptor.ValueCount;
+//                        GetPropertyValueOptions(m_handle, descriptor.Id, ref options, ref countReturned);
                     }
 
                     m_properties[descriptor.Id] = new CameraProperty(descriptor, options);

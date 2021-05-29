@@ -78,6 +78,8 @@ namespace ASCOM.SonyMirrorless
         internal static string bulbModeEnableDefault = "true";
         internal static string bulbModeTimeProfileName = "Bulb Mode Time";
         internal static string bulbModeTimeDefault = "1";
+        internal static string allowISOAdjustProfileName = "Allow ISO Adjust";
+        internal static string allowISOAdjustDefault = "false";
 
         internal static string deviceId; // Variables to hold the currrent device configuration
 
@@ -109,6 +111,7 @@ namespace ASCOM.SonyMirrorless
         internal static int Personality = SonyCommon.PERSONALITY_APT;
         internal static bool BulbModeEnable = false;
         internal static short BulbModeTime = 1;
+        internal static bool AllowISOAdjust = false;
 
         internal static bool LastSetFastReadout = false;
         internal static Mutex serialAccess;
@@ -749,18 +752,47 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_Gain"))
                 {
-                    tl.LogMessage("Gain Get", "Not implemented");
+                    if (Connected)
+                    {
+                        if (AllowISOAdjust && camera.Gains.Count > 0)
+                        {
+                            short gainIndex = camera.GainIndex;
+                            tl.LogMessage("Gain Get", gainIndex.ToString());
 
-                    throw new ASCOM.PropertyNotImplementedException("Gain", false);
+                            return gainIndex;
+                        }
+                        else
+                        {
+                            throw new ASCOM.PropertyNotImplementedException("Gains property is not enabled, see driver settings dialog");
+                        }
+                    }
+                    else
+                    {
+                        throw new ASCOM.NotConnectedException("Camera must be connected to retrieve gain");
+                    }
                 }
             }
+
             set
             {
                 using (new SerializedAccess(this, "set_Gain"))
                 {
-                    tl.LogMessage("Gain Set", "Not implemented");
-
-                    throw new ASCOM.PropertyNotImplementedException("Gain", true);
+                    if (Connected)
+                    {
+                        if (AllowISOAdjust && camera.Gains.Count > 0)
+                        {
+                            camera.GainIndex = value;
+                            tl.LogMessage("Gain Set", value.ToString());
+                        }
+                        else
+                        {
+                            throw new ASCOM.PropertyNotImplementedException("Gains property is not enabled, see driver settings dialog");
+                        }
+                    }
+                    else
+                    {
+                        throw new ASCOM.NotConnectedException("Camera must be connected to retrieve gain");
+                    }
                 }
             }
         }
@@ -797,9 +829,26 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_Gains"))
                 {
-                    tl.LogMessage("Gains Get", "Not implemented");
+                    if (Connected)
+                    {
+                        ArrayList gains = camera.Gains;
 
-                    throw new ASCOM.PropertyNotImplementedException("Gains", true);
+                        if (AllowISOAdjust && gains.Count > 0)
+                        {
+
+                            tl.LogMessage("Gains Get", String.Format("Size = {0}", gains.Count));
+
+                            return gains;
+                        }
+                        else
+                        {
+                            throw new ASCOM.PropertyNotImplementedException("Gains property is not enabled, see driver settings dialog");
+                        }
+                    }
+                    else
+                    {
+                        throw new ASCOM.NotConnectedException("Camera must be connected to get list of available gains");
+                    }
                 }
             }
         }
@@ -1442,6 +1491,7 @@ namespace ASCOM.SonyMirrorless
                 AutoLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, autoLiveviewProfileName, string.Empty, autoLiveviewDefault));
                 BulbModeEnable = Convert.ToBoolean(driverProfile.GetValue(driverID, bulbModeEnableProfileName, string.Empty, bulbModeEnableDefault));
                 BulbModeTime = Convert.ToInt16(driverProfile.GetValue(driverID, bulbModeTimeProfileName, string.Empty, bulbModeTimeDefault));
+                AllowISOAdjust = Convert.ToBoolean(driverProfile.GetValue(driverID, allowISOAdjustProfileName, string.Empty, allowISOAdjustDefault));
 
                 if (defaultReadoutMode == 0)
                 {
@@ -1479,6 +1529,7 @@ namespace ASCOM.SonyMirrorless
                 driverProfile.WriteValue(driverID, personalityProfileName, Personality.ToString());
                 driverProfile.WriteValue(driverID, bulbModeEnableProfileName, BulbModeEnable.ToString());
                 driverProfile.WriteValue(driverID, bulbModeTimeProfileName, BulbModeTime.ToString());
+                driverProfile.WriteValue(driverID, allowISOAdjustProfileName, AllowISOAdjust.ToString());
 
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
@@ -1575,7 +1626,7 @@ namespace ASCOM.SonyMirrorless
 
                 if (!serialAccess.WaitOne(1000))
                 {
-//                    LogMessage(m_method, "Waiting to enter");
+                    LogMessage(m_method, "Waiting to enter");
                     serialAccess.WaitOne();
                 }
 
