@@ -361,6 +361,15 @@ namespace ASCOM.SonyMirrorless
                 {
                     m_desiredGain = value;
                 }
+                else if (value >= Gains.Count)
+                {
+                    int desiredIndex = Gains.IndexOf(value.ToString());
+
+                    if (desiredIndex >= 0)
+                    {
+                        m_desiredGain = (short)desiredIndex;
+                    }
+                }
             }
         }
 
