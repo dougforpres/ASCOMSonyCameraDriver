@@ -363,10 +363,12 @@ namespace ASCOM.SonyMirrorless
                 }
                 else if (value >= Gains.Count)
                 {
+                    Log(String.Format("Attempting to find gain {0} match", value));
                     int desiredIndex = Gains.IndexOf(value.ToString());
 
                     if (desiredIndex >= 0)
                     {
+                        Log(String.Format("Setting gain to index {0} which matches {1}", desiredIndex, value));
                         m_desiredGain = (short)desiredIndex;
                     }
                 }
