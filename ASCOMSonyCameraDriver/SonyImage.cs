@@ -152,13 +152,25 @@ namespace ASCOM.SonyMirrorless
                             BAYER = new int[Width, Height];
                         }
 
+                        int mi = int.MaxValue, ma = int.MinValue;
+
                         for (int i = 0; i < m_info.ImageSize; i += 2)
                         {
                             int x = (i / 2) % Width;
                             int y = (i / 2) / Width;
 
-                            BAYER[x, Height - y - 1] = returndata[i] + (returndata[i + 1] << 8);
+                            int v = returndata[i] + (returndata[i + 1] << 8);
+
+                            if (v < mi) { mi = v; }
+                            if (v > ma) { ma = v; }
+                            BAYER[x, Height - y - 1] = v; // returndata[i] + (returndata[i + 1] << 8);
+                            /* if (x < 20 && y < 20)
+                            {
+                                Log(String.Format("({0}, {1}): [{2},{3}] => {4}", x, Height - y - 1, returndata[i], returndata[i + 1], BAYER[x, Height - y - 1]));
+                            } */
                         }
+
+                        Log(String.Format("min pixel = {0}, max pixel = {1}", mi, ma));
                         break;
 
                     case IMAGEMODE_RGB:

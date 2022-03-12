@@ -32,6 +32,7 @@ using System.Globalization;
 using System.Collections;
 using System.Threading;
 using Microsoft.Win32;
+using System.IO;
 
 namespace ASCOM.SonyMirrorless
 {
@@ -114,7 +115,6 @@ namespace ASCOM.SonyMirrorless
         internal static bool AllowISOAdjust = false;
 
         internal static bool LastSetFastReadout = false;
-        internal static Mutex serialAccess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="a6400"/> class.
@@ -123,6 +123,7 @@ namespace ASCOM.SonyMirrorless
         public Camera()
         {
             tl = new TraceLogger("", "SonyMirrorless");
+
             ReadProfile(); // Read device configuration from the ASCOM Profile store
 
             tl.LogMessage("Camera", "Starting initialisation");
@@ -149,10 +150,11 @@ namespace ASCOM.SonyMirrorless
         {
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
-            if (IsConnected)
-                System.Windows.Forms.MessageBox.Show("Camera is currently connected.  Some options are only available when not connected, these will be disabled.");
+            //            if (IsConnected)
+            //                System.Windows.Forms.MessageBox.Show("Camera is currently connected.  Some options are only available when not connected, these will be disabled.");
+            LogMessage("SetupDialog", "[in]");
 
-            using (SetupDialogForm F = new SetupDialogForm())
+            using (SetupDialogForm F = new SetupDialogForm(this))
             {
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
@@ -167,6 +169,8 @@ namespace ASCOM.SonyMirrorless
                     }
                 }
             }
+
+            LogMessage("SetupDialog", "[out]");
         }
 
         public ArrayList SupportedActions
@@ -306,7 +310,6 @@ namespace ASCOM.SonyMirrorless
                     {
                         LogMessage("Connected Set", "Connecting to camera {0}", deviceId);
                         camera.Connected = true;
-                        serialAccess = new Mutex();
                     }
                     else
                     {
@@ -315,8 +318,6 @@ namespace ASCOM.SonyMirrorless
 
                         // Trash the camera in the event the driver id changes
                         camera = null;
-                        serialAccess.Dispose();
-                        serialAccess = null;
                     }
                 }
                 else
@@ -340,9 +341,9 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+//                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
                 // TODO customise this driver description
-                string driverInfo = "Sony Camera Driver. For support, email <retrodotkiwi@gmail.com>. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo = "Sony Camera Driver.\nHelp/Support: <retrodotkiwi@gmail.com>.";
                 tl.LogMessage("DriverInfo Get", driverInfo);
                 return driverInfo;
             }
@@ -353,7 +354,7 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
                 tl.LogMessage("DriverVersion Get", driverVersion);
                 return driverVersion;
             }
@@ -483,7 +484,7 @@ namespace ASCOM.SonyMirrorless
                 {
                     tl.LogMessage("CCDTemperature Get Get", "Not implemented");
 
-                    throw new ASCOM.InvalidValueException("CCDTemperature Not Available");
+                    throw new ASCOM.PropertyNotImplementedException("CCDTemperature", false);
                 }
             }
         }
@@ -930,6 +931,19 @@ namespace ASCOM.SonyMirrorless
                             throw new ASCOM.InvalidOperationException("Call to ImageArray resulted in invalid image type!");
                     }
 
+/*                    using (var stream = new FileStream("c:\\users\\dougf\\test.bin", FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var writer = new BinaryWriter(stream))
+                    {
+                        int[,] b = SonyImage.BAYER;
+                        for (int y = 0; y < b.GetLength(1); y+=2)
+                        {
+                            for (int x = 0; x < b.GetLength(0); x+=2)
+                            {
+                                writer.Write((ushort)b[x, y]);
+                            }
+                        }
+                    }
+*/
                     return result;
                 }
             }
@@ -1613,30 +1627,35 @@ namespace ASCOM.SonyMirrorless
 
         public class SerializedAccess : IDisposable
         {
+            internal static Mutex m_serialAccess = new Mutex();
+
             internal String m_method;
+            internal Camera m_cam;
 
             public SerializedAccess(Camera cam, String method, bool checkConnected = false)
             {
+                m_cam = cam;
                 m_method = method;
+                LogMessage(m_method, "[enter] {0}", m_serialAccess.ToString());
 
                 if (checkConnected)
                 {
-                    cam.CheckConnected(String.Format("Camera must be connected before '{0}' can be called", method));
+                    m_cam.CheckConnected(String.Format("Camera must be connected before '{0}' can be called", method));
                 }
 
-                if (!serialAccess.WaitOne(1000))
+                if (!m_serialAccess.WaitOne(1000))
                 {
-                    LogMessage(m_method, "Waiting to enter");
-                    serialAccess.WaitOne();
+                    LogMessage(m_method, "Waiting to enter {0}", m_serialAccess.ToString());
+                    m_serialAccess.WaitOne();
                 }
 
-//                LogMessage(m_method, "[in]");
+                LogMessage(m_method, "[in] {0}", m_serialAccess.ToString());
             }
 
             public void Dispose()
             {
-//                LogMessage(m_method, "[out]");
-                serialAccess.ReleaseMutex();
+                LogMessage(m_method, "[out] {0}", m_serialAccess.ToString());
+                m_serialAccess.ReleaseMutex();
             }
         }
     }

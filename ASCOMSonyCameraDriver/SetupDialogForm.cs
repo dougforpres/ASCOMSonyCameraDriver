@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,10 +16,14 @@ namespace ASCOM.SonyMirrorless
     public partial class SetupDialogForm : Form
     {
         internal bool InInit = false;
+        internal Camera ascomCamera;
 
-        public SetupDialogForm()
+        public SetupDialogForm(Camera ascomCamera)
         {
             InitializeComponent();
+
+            this.ascomCamera = ascomCamera;
+
             // Initialise current values of user settings from the ASCOM Profile
             InitUI();
         }
@@ -115,12 +120,16 @@ namespace ASCOM.SonyMirrorless
 
             comboBoxOutputFormat.SelectedValue = Camera.defaultReadoutMode;
 
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersion = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+            textBoxVersion.Text = fileVersion.FileVersion;
+
             InInit = false;
-            timer1.Tick += showCameraStatus;
-            timer1.Start();
+//            timer1.Tick += showCameraStatus;
         }
 
-        private void showCameraStatus(Object o, EventArgs eventArgs)
+/*        private void showCameraStatus(Object o, EventArgs eventArgs)
         {
             SonyCamera camera = Camera.camera;
 
@@ -130,13 +139,19 @@ namespace ASCOM.SonyMirrorless
 
                 if (camera.Connected)
                 {
-                    camera.RefreshProperties();
-                    textBoxCameraMode.Text = camera.GetPropertyValue(0x500e).Text;
-                    textBoxCameraCompressionMode.Text = camera.GetPropertyValue(0x5004).Text;
-                    textBoxCameraExposureTime.Text = camera.GetPropertyValue(0xd20d).Text;
-                    textBoxCameraISO.Text = camera.GetPropertyValue(0xd21e).Text;
-                    textBoxCameraBatteryLevel.Text = camera.GetPropertyValue(0xd218).Text;
-                    modeWarning.Visible = textBoxCameraMode.Text != "M";
+                    using (new Camera.SerializedAccess(ascomCamera, "setupDialog"))
+                    {
+                        Camera.LogMessage("setup", "Refresh Properties");
+                        camera.RefreshProperties();
+                        Camera.LogMessage("setup", "500e");
+                        textBoxCameraMode.Text = camera.GetPropertyValue(0x500e).Text;
+                        textBoxCameraCompressionMode.Text = camera.GetPropertyValue(0x5004).Text;
+                        textBoxCameraExposureTime.Text = camera.GetPropertyValue(0xd20d).Text;
+                        textBoxCameraISO.Text = camera.GetPropertyValue(0xd21e).Text;
+                        textBoxCameraBatteryLevel.Text = camera.GetPropertyValue(0xd218).Text;
+                        modeWarning.Visible = textBoxCameraMode.Text != "M";
+                        Camera.LogMessage("setup", "All Props updated");
+                    }
                 }
                 else
                 {
@@ -152,7 +167,7 @@ namespace ASCOM.SonyMirrorless
             {
                 textBoxCameraConnected.Text = "Not Initialized";
             }
-        }
+        }*/
 
         private void checkBoxEnableSaveLocation_CheckedChanged(object sender, EventArgs e)
         {
@@ -300,7 +315,7 @@ namespace ASCOM.SonyMirrorless
                 //with a URL:
                 System.Diagnostics.Process.Start("https://github.com/dougforpres/ASCOMSonyCameraDriver/wiki/Controlling-the-Exposure-Time-and-ISO-(Gain)");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Unable to open link that was clicked.");
             }
@@ -318,10 +333,28 @@ namespace ASCOM.SonyMirrorless
                 //with a URL:
                 System.Diagnostics.Process.Start("https://github.com/dougforpres/ASCOMSonyCameraDriver/wiki/");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Unable to open link that was clicked.");
             }
         }
+
+/*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)
+        {
+            if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
+            {
+                // Stop the timer
+                timer1.Stop();
+            }
+        }
+
+        private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
+        {
+            if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
+            {
+                // Stop the timer
+                timer1.Start();
+            }
+        }*/
     }
 }

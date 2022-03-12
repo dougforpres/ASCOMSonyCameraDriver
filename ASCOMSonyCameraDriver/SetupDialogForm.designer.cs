@@ -51,7 +51,7 @@ namespace ASCOM.SonyMirrorless
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+//            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.comboBoxOutputFormat = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -59,27 +59,28 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxAutoLiveview = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.selectCameraTab = new System.Windows.Forms.TabPage();
+            this.textBoxVersion = new System.Windows.Forms.TextBox();
+            this.linkWiki = new System.Windows.Forms.LinkLabel();
             this.cameraPersonalityTab = new System.Windows.Forms.TabPage();
             this.driverSettingsTab = new System.Windows.Forms.TabPage();
+            this.linkExposureAndISO = new System.Windows.Forms.LinkLabel();
             this.checkBoxAllowISOAdjust = new System.Windows.Forms.CheckBox();
             this.textBoxBulbMode = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
-            this.cameraInfoTab = new System.Windows.Forms.TabPage();
+//            this.cameraInfoTab = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
             this.modeWarning = new System.Windows.Forms.PictureBox();
             this.extrasTab = new System.Windows.Forms.TabPage();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
-            this.linkExposureAndISO = new System.Windows.Forms.LinkLabel();
-            this.linkWiki = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
             this.cameraPersonalityTab.SuspendLayout();
             this.driverSettingsTab.SuspendLayout();
-            this.cameraInfoTab.SuspendLayout();
+//            this.cameraInfoTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).BeginInit();
             this.extrasTab.SuspendLayout();
             this.SuspendLayout();
@@ -285,7 +286,7 @@ namespace ASCOM.SonyMirrorless
             // 
             // timer1
             // 
-            this.timer1.Interval = 1000;
+//            this.timer1.Interval = 1000;
             // 
             // comboBoxOutputFormat
             // 
@@ -343,16 +344,19 @@ namespace ASCOM.SonyMirrorless
             this.tabControl1.Controls.Add(this.selectCameraTab);
             this.tabControl1.Controls.Add(this.cameraPersonalityTab);
             this.tabControl1.Controls.Add(this.driverSettingsTab);
-            this.tabControl1.Controls.Add(this.cameraInfoTab);
+//            this.tabControl1.Controls.Add(this.cameraInfoTab);
             this.tabControl1.Controls.Add(this.extrasTab);
             this.tabControl1.Location = new System.Drawing.Point(24, 17);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1050, 439);
             this.tabControl1.TabIndex = 21;
+//            this.tabControl1.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Selecting);
+//            this.tabControl1.Deselecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Deselecting);
             // 
             // selectCameraTab
             // 
+            this.selectCameraTab.Controls.Add(this.textBoxVersion);
             this.selectCameraTab.Controls.Add(this.linkWiki);
             this.selectCameraTab.Controls.Add(this.comboBoxCamera);
             this.selectCameraTab.Controls.Add(this.label1);
@@ -364,6 +368,27 @@ namespace ASCOM.SonyMirrorless
             this.selectCameraTab.TabIndex = 0;
             this.selectCameraTab.Text = "Select Camera";
             this.selectCameraTab.UseVisualStyleBackColor = true;
+            // 
+            // textBoxVersion
+            // 
+            this.textBoxVersion.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBoxVersion.Location = new System.Drawing.Point(779, 336);
+            this.textBoxVersion.Name = "textBoxVersion";
+            this.textBoxVersion.ReadOnly = true;
+            this.textBoxVersion.Size = new System.Drawing.Size(236, 24);
+            this.textBoxVersion.TabIndex = 7;
+            this.textBoxVersion.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // linkWiki
+            // 
+            this.linkWiki.AutoSize = true;
+            this.linkWiki.Location = new System.Drawing.Point(21, 343);
+            this.linkWiki.Name = "linkWiki";
+            this.linkWiki.Size = new System.Drawing.Size(437, 25);
+            this.linkWiki.TabIndex = 6;
+            this.linkWiki.TabStop = true;
+            this.linkWiki.Text = "Wiki Link: Installation, Troubleshooting, Help";
+            this.linkWiki.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
             // cameraPersonalityTab
             // 
@@ -394,6 +419,17 @@ namespace ASCOM.SonyMirrorless
             this.driverSettingsTab.TabIndex = 4;
             this.driverSettingsTab.Text = "Driver Settings";
             this.driverSettingsTab.UseVisualStyleBackColor = true;
+            // 
+            // linkExposureAndISO
+            // 
+            this.linkExposureAndISO.AutoSize = true;
+            this.linkExposureAndISO.Location = new System.Drawing.Point(16, 343);
+            this.linkExposureAndISO.Name = "linkExposureAndISO";
+            this.linkExposureAndISO.Size = new System.Drawing.Size(338, 25);
+            this.linkExposureAndISO.TabIndex = 5;
+            this.linkExposureAndISO.TabStop = true;
+            this.linkExposureAndISO.Text = "Wiki Link: ISO and Exposure Time";
+            this.linkExposureAndISO.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkWiki_LinkClicked);
             // 
             // checkBoxAllowISOAdjust
             // 
@@ -437,26 +473,26 @@ namespace ASCOM.SonyMirrorless
             // 
             // cameraInfoTab
             // 
-            this.cameraInfoTab.Controls.Add(this.label3);
-            this.cameraInfoTab.Controls.Add(this.modeWarning);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraBatteryLevel);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraISO);
-            this.cameraInfoTab.Controls.Add(this.labelCameraBatteryLevel);
-            this.cameraInfoTab.Controls.Add(this.label4);
-            this.cameraInfoTab.Controls.Add(this.label5);
-            this.cameraInfoTab.Controls.Add(this.labelCameraISO);
-            this.cameraInfoTab.Controls.Add(this.label6);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraExposureTime);
-            this.cameraInfoTab.Controls.Add(this.label7);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraCompressionMode);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraConnected);
-            this.cameraInfoTab.Controls.Add(this.textBoxCameraMode);
-            this.cameraInfoTab.Location = new System.Drawing.Point(8, 39);
-            this.cameraInfoTab.Name = "cameraInfoTab";
-            this.cameraInfoTab.Size = new System.Drawing.Size(1034, 392);
-            this.cameraInfoTab.TabIndex = 3;
-            this.cameraInfoTab.Text = "Camera Info";
-            this.cameraInfoTab.UseVisualStyleBackColor = true;
+//            this.cameraInfoTab.Controls.Add(this.label3);
+//            this.cameraInfoTab.Controls.Add(this.modeWarning);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraBatteryLevel);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraISO);
+//            this.cameraInfoTab.Controls.Add(this.labelCameraBatteryLevel);
+//            this.cameraInfoTab.Controls.Add(this.label4);
+//            this.cameraInfoTab.Controls.Add(this.label5);
+//            this.cameraInfoTab.Controls.Add(this.labelCameraISO);
+//            this.cameraInfoTab.Controls.Add(this.label6);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraExposureTime);
+//            this.cameraInfoTab.Controls.Add(this.label7);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraCompressionMode);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraConnected);
+//            this.cameraInfoTab.Controls.Add(this.textBoxCameraMode);
+//            this.cameraInfoTab.Location = new System.Drawing.Point(8, 39);
+//            this.cameraInfoTab.Name = "cameraInfoTab";
+//            this.cameraInfoTab.Size = new System.Drawing.Size(1034, 392);
+//            this.cameraInfoTab.TabIndex = 3;
+//            this.cameraInfoTab.Text = "Camera Info";
+//            this.cameraInfoTab.UseVisualStyleBackColor = true;
             // 
             // label3
             // 
@@ -521,28 +557,6 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation.UseVisualStyleBackColor = true;
             this.checkBoxEnableSaveLocation.CheckedChanged += new System.EventHandler(this.checkBoxEnableSaveLocation_CheckedChanged);
             // 
-            // linkExposureAndISO
-            // 
-            this.linkExposureAndISO.AutoSize = true;
-            this.linkExposureAndISO.Location = new System.Drawing.Point(16, 343);
-            this.linkExposureAndISO.Name = "linkExposureAndISO";
-            this.linkExposureAndISO.Size = new System.Drawing.Size(338, 25);
-            this.linkExposureAndISO.TabIndex = 5;
-            this.linkExposureAndISO.TabStop = true;
-            this.linkExposureAndISO.Text = "Wiki Link: ISO and Exposure Time";
-            this.linkExposureAndISO.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkWiki_LinkClicked);
-            // 
-            // linkWiki
-            // 
-            this.linkWiki.AutoSize = true;
-            this.linkWiki.Location = new System.Drawing.Point(21, 343);
-            this.linkWiki.Name = "linkWiki";
-            this.linkWiki.Size = new System.Drawing.Size(437, 25);
-            this.linkWiki.TabIndex = 6;
-            this.linkWiki.TabStop = true;
-            this.linkWiki.Text = "Wiki Link: Installation, Troubleshooting, Help";
-            this.linkWiki.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -568,8 +582,8 @@ namespace ASCOM.SonyMirrorless
             this.cameraPersonalityTab.PerformLayout();
             this.driverSettingsTab.ResumeLayout(false);
             this.driverSettingsTab.PerformLayout();
-            this.cameraInfoTab.ResumeLayout(false);
-            this.cameraInfoTab.PerformLayout();
+//            this.cameraInfoTab.ResumeLayout(false);
+//            this.cameraInfoTab.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).EndInit();
             this.extrasTab.ResumeLayout(false);
             this.extrasTab.PerformLayout();
@@ -596,7 +610,7 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Timer timer1;
+//        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ComboBox comboBoxOutputFormat;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
@@ -609,7 +623,7 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage selectCameraTab;
         private System.Windows.Forms.TabPage cameraPersonalityTab;
-        private System.Windows.Forms.TabPage cameraInfoTab;
+//        private System.Windows.Forms.TabPage cameraInfoTab;
         private System.Windows.Forms.TabPage extrasTab;
         private System.Windows.Forms.Button buttonSelectFolder;
         private System.Windows.Forms.TextBox textBoxSaveLocation;
@@ -623,5 +637,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.CheckBox checkBoxAllowISOAdjust;
         private System.Windows.Forms.LinkLabel linkExposureAndISO;
         private System.Windows.Forms.LinkLabel linkWiki;
+        private System.Windows.Forms.TextBox textBoxVersion;
     }
 }

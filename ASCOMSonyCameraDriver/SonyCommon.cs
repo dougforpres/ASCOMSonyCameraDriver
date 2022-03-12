@@ -37,6 +37,15 @@ namespace ASCOM.SonyMirrorless
         protected const UInt32 CAMERA_SUPPORTS_LIVEVIEW = 0x00000001;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct PortableDeviceInfo
+        {
+            public string id;
+            public string manufacturer;
+            public string model;
+            public string devicePath;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct DeviceInfo
         {
             public UInt32 Version;
@@ -119,7 +128,10 @@ namespace ASCOM.SonyMirrorless
         protected static extern UInt32 GetDeviceCount();
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-        public static extern UInt32 GetDeviceInfo(uint id, ref DeviceInfo info);
+        protected static extern UInt32 GetPortableDeviceInfo(UInt32 id, ref PortableDeviceInfo portableDeviceInfo);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern UInt32 GetDeviceInfo(uint hDevice, ref DeviceInfo info);
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 OpenDevice(string DeviceName);

@@ -15,19 +15,34 @@ namespace ASCOM.SonyMirrorless
             {
                 ArrayList result = new ArrayList();
                 UInt32 count = GetDeviceCount();
+                UInt32 hr;
+                PortableDeviceInfo portableDeviceInfo = new PortableDeviceInfo();
 
                 for (UInt32 iter = 0; iter < count; iter++)
                 {
-                    DeviceInfo info = new DeviceInfo()
-                    {
-                        Version = 1
-                    };
-
-                    UInt32 hr = GetDeviceInfo(iter, ref info);
+                    hr = GetPortableDeviceInfo(iter, ref portableDeviceInfo);
 
                     if (hr == ERROR_SUCCESS)
                     {
-                        result.Add(new SonyCamera(info));
+                        // Try to open the device
+                        UInt32 handle = OpenDevice(portableDeviceInfo.id);
+
+                        if (handle != INVALID_HANDLE_VALUE)
+                        {
+                            DeviceInfo info = new DeviceInfo()
+                            {
+                                Version = 1
+                            };
+
+                            hr = GetDeviceInfo(handle, ref info);
+
+                            if (hr == ERROR_SUCCESS)
+                            {
+                                result.Add(new SonyCamera(info));
+                            }
+
+                            CloseDevice(handle);
+                        }
                     }
                 }
 
