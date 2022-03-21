@@ -351,8 +351,11 @@ namespace ASCOM.SonyMirrorless
                 CameraProperty iso = GetProperty(SonyCommon.PROPERTY_ISO);
 
                 UInt32 value = iso.CurrentValue(m_handle).Value;
+                short index = (short)Gains.IndexOf(value.ToString());
 
-                return (short)Gains.IndexOf(value.ToString());
+                Log(String.Format("get GainIndex: camera reports '{0}', which maps to index {1}", value, index));
+
+                return index;
             }
 
             set

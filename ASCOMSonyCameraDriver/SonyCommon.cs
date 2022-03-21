@@ -128,6 +128,9 @@ namespace ASCOM.SonyMirrorless
         protected static extern UInt32 GetDeviceCount();
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 GetPortableDeviceCount();
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 GetPortableDeviceInfo(UInt32 id, ref PortableDeviceInfo portableDeviceInfo);
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]

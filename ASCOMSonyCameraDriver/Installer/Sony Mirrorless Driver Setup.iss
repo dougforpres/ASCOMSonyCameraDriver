@@ -51,6 +51,7 @@ Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
+Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyCameraInfo64.exe"; DestDir: "{app}"
 
 ; AnyCPU files
 Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"

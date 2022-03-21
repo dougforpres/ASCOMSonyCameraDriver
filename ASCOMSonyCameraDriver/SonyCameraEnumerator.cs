@@ -14,7 +14,7 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 ArrayList result = new ArrayList();
-                UInt32 count = GetDeviceCount();
+                UInt32 count = GetPortableDeviceCount();
                 UInt32 hr;
                 PortableDeviceInfo portableDeviceInfo = new PortableDeviceInfo();
 
