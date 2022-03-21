@@ -5,8 +5,8 @@
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
 AppName=ASCOM Sony Mirrorless Driver Camera Driver         
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.32
-AppVersion=0.0.32
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 0.0.33
+AppVersion=0.0.33
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
@@ -51,7 +51,7 @@ Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libraw.dll"; DestDir
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyMTPCamera.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\turbojpeg.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
 Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\libusbK.dll"; DestDir: "{sys}"; Flags: 64bit; Check: IsWin64
-Source: "C:\Users\dougf\source\repos\SonyCamera\Release\SonyCameraInfo64.exe"; DestDir: "{app}"
+Source: "C:\Users\dougf\source\repos\SonyCamera\x64\Release\SonyCameraInfo64.exe"; DestDir: "{app}"
 
 ; AnyCPU files
 Source: "C:\Users\dougf\source\repos\ASCOMSonyCameraDriver\ASCOMSonyCameraDriver\bin\Release\ASCOM.SonyMirrorless.Camera.dll"; DestDir: "{app}"
