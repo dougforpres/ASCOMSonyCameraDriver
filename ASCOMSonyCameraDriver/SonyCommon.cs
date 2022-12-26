@@ -61,6 +61,7 @@ namespace ASCOM.SonyMirrorless
             public Double ExposureTimeStep;
             public Double PixelWidth;
             public Double PixelHeight;
+            public UInt32 BitsPerPixel;
 
             public string Manufacturer;
             public string Model;

@@ -36,7 +36,7 @@ namespace ASCOM.SonyMirrorless
 #endif
 
             device.Connected = true;
-            device.SetupDialog();
+//            device.SetupDialog();
             // now run some tests, adding code to your driver so that the tests will pass.
             // these first tests are common to all drivers.
             Console.WriteLine("name " + device.Name);
@@ -52,9 +52,10 @@ namespace ASCOM.SonyMirrorless
 
             device.FastReadout = true;
 
-            Console.WriteLine(device.Gain);
-            device.Gain = 10;
-            Console.WriteLine(device.Gains.ToString());
+//            Console.WriteLine(device.Gain);
+//            device.Gain = 10;
+//            Console.WriteLine(device.Gains.ToString());
+            Console.WriteLine(device.MaxADU.ToString());
 
 /*            while (true)
             {

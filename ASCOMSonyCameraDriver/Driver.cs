@@ -1040,9 +1040,12 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_MaxADU"))
                 {
-                    tl.LogMessage("MaxADU Get", "20000");
+                    int bpp = (int)camera.Info.BitsPerPixel;
+                    int maxADU = (1 << bpp) - 1;
 
-                    return 20000;
+                    tl.LogMessage("MaxADU Get", maxADU.ToString());
+
+                    return maxADU;
                 }
             }
         }
