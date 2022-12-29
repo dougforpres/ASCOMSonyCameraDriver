@@ -37,6 +37,7 @@ namespace ASCOM.SonyMirrorless
             Camera.defaultReadoutMode = (short)comboBoxOutputFormat.SelectedValue;
             Camera.SaveRawImageData = checkBoxEnableSaveLocation.Checked;
             Camera.SaveRawImageFolder = textBoxSaveLocation.Text;
+            Camera.SaveRawImageFolderWithDate = checkBoxAppendDate.Checked;
             Camera.UseLiveview = checkBoxUseLiveview.Checked;
             Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
@@ -94,6 +95,8 @@ namespace ASCOM.SonyMirrorless
             checkBoxEnableSaveLocation.Checked = Camera.SaveRawImageData;
             textBoxSaveLocation.Enabled = Camera.SaveRawImageData;
             textBoxSaveLocation.Text = Camera.SaveRawImageFolder;
+            checkBoxAppendDate.Enabled = textBoxSaveLocation.Enabled;
+            checkBoxAppendDate.Checked = Camera.SaveRawImageFolderWithDate;
             buttonSelectFolder.Enabled = Camera.SaveRawImageData;
             checkBoxUseLiveview.Checked = Camera.UseLiveview;
             checkBoxAutoLiveview.Checked = Camera.AutoLiveview;
@@ -173,6 +176,7 @@ namespace ASCOM.SonyMirrorless
         {
             textBoxSaveLocation.Enabled = ((CheckBox)sender).Checked;
             buttonSelectFolder.Enabled = ((CheckBox)sender).Checked;
+            checkBoxAppendDate.Enabled = ((CheckBox)sender).Checked;
         }
 
         private void selectFolder_Click(object sender, EventArgs e)
@@ -339,22 +343,22 @@ namespace ASCOM.SonyMirrorless
             }
         }
 
-/*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)
-        {
-            if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
-            {
-                // Stop the timer
-                timer1.Stop();
-            }
-        }
+        /*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)
+                {
+                    if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
+                    {
+                        // Stop the timer
+                        timer1.Stop();
+                    }
+                }
 
-        private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
-        {
-            if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
-            {
-                // Stop the timer
-                timer1.Start();
-            }
-        }*/
+                private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
+                {
+                    if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
+                    {
+                        // Stop the timer
+                        timer1.Start();
+                    }
+                }*/
     }
 }

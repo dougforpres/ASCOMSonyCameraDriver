@@ -106,6 +106,7 @@ namespace ASCOM.SonyMirrorless
 
         internal static short defaultReadoutMode = SonyCommon.OUTPUTFORMAT_RGB;
         internal static bool SaveRawImageData = false;
+        internal static bool SaveRawImageFolderWithDate = false;
         internal static string SaveRawImageFolder = "";
         internal static bool UseLiveview = false;
         internal static bool AutoLiveview = false;
@@ -1516,18 +1517,20 @@ namespace ASCOM.SonyMirrorless
                 }
 
                 // This needs to actually save to registry
-                SaveRawImageData = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", "0"));
+                SaveRawImageData = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", 0));
                 SaveRawImageFolder = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", "");
+                SaveRawImageFolderWithDate = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", 0));
 
-                LogMessage("ReadProfile", "DeviceID:             {0}", deviceId);
-                LogMessage("ReadProfile", "Default Readout Mode: {0}", defaultReadoutMode.ToString());
-                LogMessage("ReadProfile", "Save Raw files:       {0}", SaveRawImageData.ToString());
-                LogMessage("ReadProfile", "Save Raw files Path:  {0}", SaveRawImageFolder);
-                LogMessage("ReadProfile", "Use Liveview:         {0}", UseLiveview.ToString());
-                LogMessage("ReadProfile", "AutoLiveview @ 0.0s:  {0}", AutoLiveview.ToString());
-                LogMessage("ReadProfile", "Personality:          {0}", Personality.ToString());
-                LogMessage("ReadProfile", "Bulb Mode Enable:     {0}", BulbModeEnable.ToString());
-                LogMessage("ReadProfile", "Bulb Mode Time:       {0}", BulbModeTime.ToString());
+                LogMessage("ReadProfile", "DeviceID:                      {0}", deviceId);
+                LogMessage("ReadProfile", "Default Readout Mode:          {0}", defaultReadoutMode.ToString());
+                LogMessage("ReadProfile", "Save Raw files:                {0}", SaveRawImageData.ToString());
+                LogMessage("ReadProfile", "Save Raw files Path:           {0}", SaveRawImageFolder);
+                LogMessage("ReadProfile", "Save Raw files Path Add Date:  {0}", SaveRawImageFolderWithDate.ToString());
+                LogMessage("ReadProfile", "Use Liveview:                  {0}", UseLiveview.ToString());
+                LogMessage("ReadProfile", "AutoLiveview @ 0.0s:           {0}", AutoLiveview.ToString());
+                LogMessage("ReadProfile", "Personality:                   {0}", Personality.ToString());
+                LogMessage("ReadProfile", "Bulb Mode Enable:              {0}", BulbModeEnable.ToString());
+                LogMessage("ReadProfile", "Bulb Mode Time:                {0}", BulbModeTime.ToString());
             }
         }
 
@@ -1550,6 +1553,7 @@ namespace ASCOM.SonyMirrorless
 
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
+                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", SaveRawImageFolderWithDate ? 1 : 0);
 
                 if (deviceId != null)
                 {

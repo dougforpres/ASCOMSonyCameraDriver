@@ -28,7 +28,6 @@ namespace ASCOM.SonyMirrorless
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetupDialogForm));
             this.cmdOK = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
@@ -51,7 +50,6 @@ namespace ASCOM.SonyMirrorless
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-//            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.comboBoxOutputFormat = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -68,21 +66,20 @@ namespace ASCOM.SonyMirrorless
             this.textBoxBulbMode = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
-//            this.cameraInfoTab = new System.Windows.Forms.TabPage();
-            this.label3 = new System.Windows.Forms.Label();
-            this.modeWarning = new System.Windows.Forms.PictureBox();
             this.extrasTab = new System.Windows.Forms.TabPage();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.modeWarning = new System.Windows.Forms.PictureBox();
+            this.checkBoxAppendDate = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
             this.cameraPersonalityTab.SuspendLayout();
             this.driverSettingsTab.SuspendLayout();
-//            this.cameraInfoTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).BeginInit();
             this.extrasTab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).BeginInit();
             this.SuspendLayout();
             // 
             // cmdOK
@@ -284,10 +281,6 @@ namespace ASCOM.SonyMirrorless
             this.label4.TabIndex = 0;
             this.label4.Text = "Connected";
             // 
-            // timer1
-            // 
-//            this.timer1.Interval = 1000;
-            // 
             // comboBoxOutputFormat
             // 
             this.comboBoxOutputFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -344,15 +337,12 @@ namespace ASCOM.SonyMirrorless
             this.tabControl1.Controls.Add(this.selectCameraTab);
             this.tabControl1.Controls.Add(this.cameraPersonalityTab);
             this.tabControl1.Controls.Add(this.driverSettingsTab);
-//            this.tabControl1.Controls.Add(this.cameraInfoTab);
             this.tabControl1.Controls.Add(this.extrasTab);
             this.tabControl1.Location = new System.Drawing.Point(24, 17);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1050, 439);
             this.tabControl1.TabIndex = 21;
-//            this.tabControl1.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Selecting);
-//            this.tabControl1.Deselecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Deselecting);
             // 
             // selectCameraTab
             // 
@@ -471,52 +461,9 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxBulbMode.UseVisualStyleBackColor = true;
             this.checkBoxBulbMode.CheckedChanged += new System.EventHandler(this.checkBoxBulbMode_CheckedChanged);
             // 
-            // cameraInfoTab
-            // 
-//            this.cameraInfoTab.Controls.Add(this.label3);
-//            this.cameraInfoTab.Controls.Add(this.modeWarning);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraBatteryLevel);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraISO);
-//            this.cameraInfoTab.Controls.Add(this.labelCameraBatteryLevel);
-//            this.cameraInfoTab.Controls.Add(this.label4);
-//            this.cameraInfoTab.Controls.Add(this.label5);
-//            this.cameraInfoTab.Controls.Add(this.labelCameraISO);
-//            this.cameraInfoTab.Controls.Add(this.label6);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraExposureTime);
-//            this.cameraInfoTab.Controls.Add(this.label7);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraCompressionMode);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraConnected);
-//            this.cameraInfoTab.Controls.Add(this.textBoxCameraMode);
-//            this.cameraInfoTab.Location = new System.Drawing.Point(8, 39);
-//            this.cameraInfoTab.Name = "cameraInfoTab";
-//            this.cameraInfoTab.Size = new System.Drawing.Size(1034, 392);
-//            this.cameraInfoTab.TabIndex = 3;
-//            this.cameraInfoTab.Text = "Camera Info";
-//            this.cameraInfoTab.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 350);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(877, 25);
-            this.label3.TabIndex = 13;
-            this.label3.Text = "* The information above is only populated when the application is connected to th" +
-    "e camera";
-            // 
-            // modeWarning
-            // 
-            this.modeWarning.Image = ((System.Drawing.Image)(resources.GetObject("modeWarning.Image")));
-            this.modeWarning.Location = new System.Drawing.Point(484, 108);
-            this.modeWarning.Name = "modeWarning";
-            this.modeWarning.Size = new System.Drawing.Size(40, 40);
-            this.modeWarning.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.modeWarning.TabIndex = 12;
-            this.modeWarning.TabStop = false;
-            this.modeWarning.Visible = false;
-            // 
             // extrasTab
             // 
+            this.extrasTab.Controls.Add(this.checkBoxAppendDate);
             this.extrasTab.Controls.Add(this.chkTrace);
             this.extrasTab.Controls.Add(this.buttonSelectFolder);
             this.extrasTab.Controls.Add(this.textBoxSaveLocation);
@@ -557,6 +504,37 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation.UseVisualStyleBackColor = true;
             this.checkBoxEnableSaveLocation.CheckedChanged += new System.EventHandler(this.checkBoxEnableSaveLocation_CheckedChanged);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(16, 350);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(877, 25);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "* The information above is only populated when the application is connected to th" +
+    "e camera";
+            // 
+            // modeWarning
+            // 
+            this.modeWarning.Image = ((System.Drawing.Image)(resources.GetObject("modeWarning.Image")));
+            this.modeWarning.Location = new System.Drawing.Point(484, 108);
+            this.modeWarning.Name = "modeWarning";
+            this.modeWarning.Size = new System.Drawing.Size(40, 40);
+            this.modeWarning.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.modeWarning.TabIndex = 12;
+            this.modeWarning.TabStop = false;
+            this.modeWarning.Visible = false;
+            // 
+            // checkBoxAppendDate
+            // 
+            this.checkBoxAppendDate.AutoSize = true;
+            this.checkBoxAppendDate.Location = new System.Drawing.Point(54, 72);
+            this.checkBoxAppendDate.Name = "checkBoxAppendDate";
+            this.checkBoxAppendDate.Size = new System.Drawing.Size(473, 29);
+            this.checkBoxAppendDate.TabIndex = 15;
+            this.checkBoxAppendDate.Text = "Save files to a sub-directory with todays date";
+            this.checkBoxAppendDate.UseVisualStyleBackColor = true;
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -582,11 +560,9 @@ namespace ASCOM.SonyMirrorless
             this.cameraPersonalityTab.PerformLayout();
             this.driverSettingsTab.ResumeLayout(false);
             this.driverSettingsTab.PerformLayout();
-//            this.cameraInfoTab.ResumeLayout(false);
-//            this.cameraInfoTab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).EndInit();
             this.extrasTab.ResumeLayout(false);
             this.extrasTab.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.modeWarning)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -638,5 +614,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.LinkLabel linkExposureAndISO;
         private System.Windows.Forms.LinkLabel linkWiki;
         private System.Windows.Forms.TextBox textBoxVersion;
+        private System.Windows.Forms.CheckBox checkBoxAppendDate;
     }
 }
