@@ -242,88 +242,94 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                if (camera != null)
+                using (new SerializedAccess(this, "get_Connected"))
                 {
-                    LogMessage("Connected", "Get {0}", camera.Connected);
+                    if (camera != null)
+                    {
+                        LogMessage("Connected", "Get {0}", camera.Connected);
 
-                    return camera.Connected;
-                }
-                else
-                {
-                    LogMessage("Camera not yet specified/created", "");
+                        return camera.Connected;
+                    }
+                    else
+                    {
+                        LogMessage("Camera not yet specified/created", "");
 
-                    return false;
+                        return false;
+                    }
                 }
             }
             set
             {
-                if (value && camera == null)
+                using (new SerializedAccess(this, "set_Connected"))
                 {
-                    LogMessage("connected", "Camera is NULL", "");
-                    LogMessage("connected", "deviceId = '{0}'", deviceId);
-
-                    // See if we can create a camera using deviceId
-                    if (deviceId == "")
+                    if (value && camera == null)
                     {
-                        SetupDialog();
-                    }
+                        LogMessage("connected", "Camera is NULL", "");
+                        LogMessage("connected", "deviceId = '{0}'", deviceId);
 
-                    if (deviceId != "")
-                    {
-                        SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
-
-                        foreach (SonyCamera candidate in enumerator.Cameras)
+                        // See if we can create a camera using deviceId
+                        if (deviceId == "")
                         {
-                            if (camera == null && candidate.DisplayName == deviceId)
+                            SetupDialog();
+                        }
+
+                        if (deviceId != "")
+                        {
+                            SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
+
+                            foreach (SonyCamera candidate in enumerator.Cameras)
                             {
-                                LogMessage("connected", "Found info... creating camera obj", "");
-                                camera = candidate;
-                                camera.Logger = tl;
-                                cameraNumX = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
-                                cameraNumY = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
-
-                                switch (defaultReadoutMode)
+                                if (camera == null && candidate.DisplayName == deviceId)
                                 {
-                                    case 0:
-                                        camera.OutputMode = SonyCamera.ImageMode.RGB;
-                                        break;
+                                    LogMessage("connected", "Found info... creating camera obj", "");
+                                    camera = candidate;
+                                    camera.Logger = tl;
+                                    cameraNumX = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
+                                    cameraNumY = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
 
-                                    case 1:
-                                        camera.OutputMode = SonyCamera.ImageMode.RGGB;
-                                        break;
+                                    switch (defaultReadoutMode)
+                                    {
+                                        case 0:
+                                            camera.OutputMode = SonyCamera.ImageMode.RGB;
+                                            break;
+
+                                        case 1:
+                                            camera.OutputMode = SonyCamera.ImageMode.RGGB;
+                                            break;
+                                    }
+
+                                    camera.BulbMode = BulbModeEnable;
+                                    camera.BulbModeTime = BulbModeTime;
                                 }
-
-                                camera.BulbMode = BulbModeEnable;
-                                camera.BulbModeTime = BulbModeTime;
                             }
                         }
                     }
-                }
 
-                if (camera != null)
-                {
-                    LogMessage("Connected", "Set {0}", value);
-
-                    if (value == camera.Connected)
-                        return;
-
-                    if (value)
+                    if (camera != null)
                     {
-                        LogMessage("Connected Set", "Connecting to camera {0}", deviceId);
-                        camera.Connected = true;
+                        LogMessage("Connected", "Set {0}", value);
+
+                        if (value == camera.Connected)
+                            return;
+
+                        if (value)
+                        {
+                            LogMessage("Connected Set", "Connecting to camera {0}", deviceId);
+                            camera.Connected = true;
+                        }
+                        else
+                        {
+                            LogMessage("Connected Set", "Disconnecting from camera {0}", deviceId);
+                            camera.Connected = false;
+
+                            // Trash the camera in the event the driver id changes
+                            camera = null;
+                        }
                     }
                     else
                     {
-                        LogMessage("Connected Set", "Disconnecting from camera {0}", deviceId);
-                        camera.Connected = false;
-
-                        // Trash the camera in the event the driver id changes
-                        camera = null;
+                        tl.LogMessage("Connected Set", "Camera not yet specified");
                     }
-                }
-                else
-                {
-                    tl.LogMessage("Connected Set", "Camera not yet specified");
                 }
             }
         }
