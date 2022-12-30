@@ -5,8 +5,8 @@
 [Setup]
 AppID={{aa3f61ab-dde5-41ac-ad0e-e00604609f71}
 AppName=ASCOM Sony Mirrorless Driver Camera Driver         
-AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 1.0.0.40
-AppVersion=1.0.0.40
+AppVerName=ASCOM Sony Mirrorless Driver Camera Driver 1.0.0.41
+AppVersion=1.0.0.41
 AppPublisher=Doug Henderson <retrodotkiwi@gmail.com>
 AppPublisherURL=mailto:retrodotkiwi@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
