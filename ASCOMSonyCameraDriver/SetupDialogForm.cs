@@ -38,6 +38,7 @@ namespace ASCOM.SonyMirrorless
             Camera.SaveRawImageData = checkBoxEnableSaveLocation.Checked;
             Camera.SaveRawImageFolder = textBoxSaveLocation.Text;
             Camera.SaveRawImageFolderWithDate = checkBoxAppendDate.Checked;
+            Camera.SaveRawImageCreateMultipleDirectories = checkBoxCreateMultipleDirectories.Checked;
             Camera.UseLiveview = checkBoxUseLiveview.Checked;
             Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
             Camera.Personality = (int)comboBoxPersonality.SelectedValue;
@@ -97,6 +98,9 @@ namespace ASCOM.SonyMirrorless
             textBoxSaveLocation.Text = Camera.SaveRawImageFolder;
             checkBoxAppendDate.Enabled = textBoxSaveLocation.Enabled;
             checkBoxAppendDate.Checked = Camera.SaveRawImageFolderWithDate;
+            checkBoxCreateMultipleDirectories.Enabled = textBoxSaveLocation.Enabled;
+            checkBoxCreateMultipleDirectories.Checked = Camera.SaveRawImageCreateMultipleDirectories;
+
             buttonSelectFolder.Enabled = Camera.SaveRawImageData;
             checkBoxUseLiveview.Checked = Camera.UseLiveview;
             checkBoxAutoLiveview.Checked = Camera.AutoLiveview;
@@ -177,6 +181,7 @@ namespace ASCOM.SonyMirrorless
             textBoxSaveLocation.Enabled = ((CheckBox)sender).Checked;
             buttonSelectFolder.Enabled = ((CheckBox)sender).Checked;
             checkBoxAppendDate.Enabled = ((CheckBox)sender).Checked;
+            checkBoxCreateMultipleDirectories.Enabled = ((CheckBox)sender).Checked;
         }
 
         private void selectFolder_Click(object sender, EventArgs e)

@@ -67,12 +67,13 @@ namespace ASCOM.SonyMirrorless
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
             this.extrasTab = new System.Windows.Forms.TabPage();
+            this.checkBoxAppendDate = new System.Windows.Forms.CheckBox();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.modeWarning = new System.Windows.Forms.PictureBox();
-            this.checkBoxAppendDate = new System.Windows.Forms.CheckBox();
+            this.checkBoxCreateMultipleDirectories = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -463,6 +464,7 @@ namespace ASCOM.SonyMirrorless
             // 
             // extrasTab
             // 
+            this.extrasTab.Controls.Add(this.checkBoxCreateMultipleDirectories);
             this.extrasTab.Controls.Add(this.checkBoxAppendDate);
             this.extrasTab.Controls.Add(this.chkTrace);
             this.extrasTab.Controls.Add(this.buttonSelectFolder);
@@ -474,6 +476,16 @@ namespace ASCOM.SonyMirrorless
             this.extrasTab.TabIndex = 2;
             this.extrasTab.Text = "Extras";
             this.extrasTab.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxAppendDate
+            // 
+            this.checkBoxAppendDate.AutoSize = true;
+            this.checkBoxAppendDate.Location = new System.Drawing.Point(54, 72);
+            this.checkBoxAppendDate.Name = "checkBoxAppendDate";
+            this.checkBoxAppendDate.Size = new System.Drawing.Size(473, 29);
+            this.checkBoxAppendDate.TabIndex = 15;
+            this.checkBoxAppendDate.Text = "Save files to a sub-directory with todays date";
+            this.checkBoxAppendDate.UseVisualStyleBackColor = true;
             // 
             // buttonSelectFolder
             // 
@@ -525,15 +537,15 @@ namespace ASCOM.SonyMirrorless
             this.modeWarning.TabStop = false;
             this.modeWarning.Visible = false;
             // 
-            // checkBoxAppendDate
+            // checkBoxCreateMultipleDirectories
             // 
-            this.checkBoxAppendDate.AutoSize = true;
-            this.checkBoxAppendDate.Location = new System.Drawing.Point(54, 72);
-            this.checkBoxAppendDate.Name = "checkBoxAppendDate";
-            this.checkBoxAppendDate.Size = new System.Drawing.Size(473, 29);
-            this.checkBoxAppendDate.TabIndex = 15;
-            this.checkBoxAppendDate.Text = "Save files to a sub-directory with todays date";
-            this.checkBoxAppendDate.UseVisualStyleBackColor = true;
+            this.checkBoxCreateMultipleDirectories.AutoSize = true;
+            this.checkBoxCreateMultipleDirectories.Location = new System.Drawing.Point(54, 108);
+            this.checkBoxCreateMultipleDirectories.Name = "checkBoxCreateMultipleDirectories";
+            this.checkBoxCreateMultipleDirectories.Size = new System.Drawing.Size(604, 29);
+            this.checkBoxCreateMultipleDirectories.TabIndex = 16;
+            this.checkBoxCreateMultipleDirectories.Text = "If directory already exists, create a new one with (1), (2), ...";
+            this.checkBoxCreateMultipleDirectories.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
@@ -615,5 +627,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.LinkLabel linkWiki;
         private System.Windows.Forms.TextBox textBoxVersion;
         private System.Windows.Forms.CheckBox checkBoxAppendDate;
+        private System.Windows.Forms.CheckBox checkBoxCreateMultipleDirectories;
     }
 }

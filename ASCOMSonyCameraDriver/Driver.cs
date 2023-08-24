@@ -107,6 +107,7 @@ namespace ASCOM.SonyMirrorless
         internal static short defaultReadoutMode = SonyCommon.OUTPUTFORMAT_RGB;
         internal static bool SaveRawImageData = false;
         internal static bool SaveRawImageFolderWithDate = false;
+        internal static bool SaveRawImageCreateMultipleDirectories = false;
         internal static string SaveRawImageFolder = "";
         internal static bool UseLiveview = false;
         internal static bool AutoLiveview = false;
@@ -1526,6 +1527,7 @@ namespace ASCOM.SonyMirrorless
                 SaveRawImageData = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", 0));
                 SaveRawImageFolder = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", "");
                 SaveRawImageFolderWithDate = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", 0));
+                SaveRawImageCreateMultipleDirectories = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Create Multiple Directories", 0));
 
                 LogMessage("ReadProfile", "DeviceID:                      {0}", deviceId);
                 LogMessage("ReadProfile", "Default Readout Mode:          {0}", defaultReadoutMode.ToString());
@@ -1560,6 +1562,7 @@ namespace ASCOM.SonyMirrorless
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
                 Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", SaveRawImageFolderWithDate ? 1 : 0);
+                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Create Multiple Directories", SaveRawImageCreateMultipleDirectories ? 1 : 0);
 
                 if (deviceId != null)
                 {
