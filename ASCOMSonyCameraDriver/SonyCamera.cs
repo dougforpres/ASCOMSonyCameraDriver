@@ -346,8 +346,6 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                RefreshProperties();
-
                 CameraProperty iso = GetProperty(SonyCommon.PROPERTY_ISO);
 
                 UInt32 value = iso.CurrentValue(m_handle).Value;
@@ -437,11 +435,6 @@ namespace ASCOM.SonyMirrorless
         {
             PopulatePropertyInfo();
             return m_properties.ContainsKey(id) ? m_properties[id].CurrentValue(m_handle) : new PropertyValue();
-        }
-
-        public void RefreshProperties()
-        {
-            RefreshPropertyList(m_handle);
         }
 
         private void Log(String message)
