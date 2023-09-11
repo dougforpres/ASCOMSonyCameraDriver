@@ -19,7 +19,6 @@ namespace ASCOM.SonyMirrorless
         internal ImageMode m_outputMode = ImageMode.RGB;
         internal CameraInfo m_resolutions;
         internal Dictionary<UInt32, CameraProperty> m_properties = new Dictionary<UInt32, CameraProperty>();
-        internal TraceLogger m_logger = null;
         internal Boolean m_bulbMode = false;
         internal short m_bulbModeTime = 1;
         internal short m_desiredGain = -1;
@@ -48,14 +47,6 @@ namespace ASCOM.SonyMirrorless
             m_mode.ImageHeightPixels = m_info.CropMode == 0 ? m_info.ImageHeightPixels : m_info.ImageHeightCroppedPixels;
         }
 
-        public TraceLogger Logger
-        {
-            set
-            {
-                m_logger = value;
-            }
-        }
-
         public bool Connected
         {
             get
@@ -71,6 +62,7 @@ namespace ASCOM.SonyMirrorless
                     {
                         m_handle = OpenDevice(m_info.DeviceName);
                         GetCameraInfo(m_handle, ref m_resolutions, 0);
+                        Log("Connected to Camera");
                     }
                 }
                 else
@@ -81,6 +73,7 @@ namespace ASCOM.SonyMirrorless
                     }
 
                     m_handle = INVALID_HANDLE_VALUE;
+                    Log("Unable to connect to camera");
                 }
             }
         }
@@ -152,6 +145,32 @@ namespace ASCOM.SonyMirrorless
             }
         }
 
+        public void MoveFocus(int direction)
+        {
+            uint focusValue = 0;
+
+            switch (direction)
+            {
+                case 1:
+                    focusValue = 1;
+                    break;
+
+                case 2:
+                    focusValue = 3;
+                    break;
+
+                case -1:
+                    focusValue = 0xffff;
+                    break;
+
+                case -2:
+                    focusValue = 0xfffd;
+                    break;
+            }
+
+            SetPropertyValue(m_handle, SonyCommon.PROPERTY_FOCUS_CONTROL, focusValue);
+        }
+
         public SonyImage StartCapture(double duration, int personality, short readoutMode)
         {
             ImageInfo info = new ImageInfo();
@@ -180,7 +199,7 @@ namespace ASCOM.SonyMirrorless
             {
                 info.ImageMode = IMAGEMODE_RGB;
                 GetPreviewImage(m_handle, ref info);
-                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
+                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode);
             }
             else
             {
@@ -196,7 +215,7 @@ namespace ASCOM.SonyMirrorless
                 }
 
                 StartCapture(m_handle, ref info);
-                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode, m_logger);
+                m_lastImage = new SonyImage(m_handle, info, personality, readoutMode);
             }
 
             return m_lastImage;
@@ -439,10 +458,7 @@ namespace ASCOM.SonyMirrorless
 
         private void Log(String message)
         {
-            if (m_logger != null)
-            {
-                m_logger.LogMessage("SonyCamera", message);
-            }
+            DriverCommon.LogCameraMessage("SonyCamera", message);
         }
     }
 }

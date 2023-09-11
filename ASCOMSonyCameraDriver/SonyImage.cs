@@ -17,7 +17,6 @@ namespace ASCOM.SonyMirrorless
 
         internal ImageInfo m_info;
         internal UInt32 m_cameraHandle;
-        internal TraceLogger m_logger;
         public DateTime StartTime = DateTime.Now;
         private int m_personality;
         private short m_readoutMode;
@@ -29,10 +28,9 @@ namespace ASCOM.SonyMirrorless
         public static int[,,] RGB;
         public static int[,] BAYER;
 
-        public SonyImage(UInt32 handle, ImageInfo info, int personality, short readoutMode, TraceLogger logger)
+        public SonyImage(UInt32 handle, ImageInfo info, int personality, short readoutMode)
         {
             m_cameraHandle = handle;
-            m_logger = logger;
             m_info = info;
             m_personality = personality;
             m_readoutMode = readoutMode;
@@ -236,14 +234,17 @@ namespace ASCOM.SonyMirrorless
                 Marshal.FreeCoTaskMem(m_info.ImageData);
                 m_info.ImageData = IntPtr.Zero;
             }
+
+            if (m_info.MetaData != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(m_info.MetaData);
+                m_info.MetaData = IntPtr.Zero;
+            }
         }
 
         private void Log(String message)
         {
-            if (m_logger != null)
-            {
-                m_logger.LogMessage("SonyImage", message);
-            }
+            DriverCommon.LogCameraMessage("SonyImage", message);
         }
     }
 }

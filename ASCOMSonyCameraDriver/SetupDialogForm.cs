@@ -16,13 +16,11 @@ namespace ASCOM.SonyMirrorless
     public partial class SetupDialogForm : Form
     {
         internal bool InInit = false;
-        internal Camera ascomCamera;
+//        internal Camera ascomCamera;
 
-        public SetupDialogForm(Camera ascomCamera)
+        public SetupDialogForm()
         {
             InitializeComponent();
-
-            this.ascomCamera = ascomCamera;
 
             // Initialise current values of user settings from the ASCOM Profile
             InitUI();
@@ -32,19 +30,19 @@ namespace ASCOM.SonyMirrorless
         {
             // Place any validation constraint checks here
             // Update the state variables with results from the dialogue
-            Camera.deviceId = (string)comboBoxCamera.SelectedItem;
-            Camera.tl.Enabled = chkTrace.Checked;
-            Camera.defaultReadoutMode = (short)comboBoxOutputFormat.SelectedValue;
-            Camera.SaveRawImageData = checkBoxEnableSaveLocation.Checked;
-            Camera.SaveRawImageFolder = textBoxSaveLocation.Text;
-            Camera.SaveRawImageFolderWithDate = checkBoxAppendDate.Checked;
-            Camera.SaveRawImageCreateMultipleDirectories = checkBoxCreateMultipleDirectories.Checked;
-            Camera.UseLiveview = checkBoxUseLiveview.Checked;
-            Camera.AutoLiveview = checkBoxAutoLiveview.Checked;
-            Camera.Personality = (int)comboBoxPersonality.SelectedValue;
-            Camera.BulbModeEnable = checkBoxBulbMode.Checked;
-            Camera.BulbModeTime = short.Parse(textBoxBulbMode.Text.Trim());
-            Camera.AllowISOAdjust = checkBoxAllowISOAdjust.Checked;
+            DriverCommon.Settings.DeviceId = (string)comboBoxCamera.SelectedItem;
+            DriverCommon.Settings.EnableLogging = chkTrace.Checked;
+            DriverCommon.Settings.DefaultReadoutMode = (short)comboBoxOutputFormat.SelectedValue;
+            DriverCommon.Settings.ARWAutosave = checkBoxEnableSaveLocation.Checked;
+            DriverCommon.Settings.ARWAutosaveFolder = textBoxSaveLocation.Text;
+            DriverCommon.Settings.ARWAutosaveWithDate = checkBoxAppendDate.Checked;
+            DriverCommon.Settings.ARWAutosaveAlwaysCreateEmptyFolder = checkBoxCreateMultipleDirectories.Checked;
+            DriverCommon.Settings.UseLiveview = checkBoxUseLiveview.Checked;
+            DriverCommon.Settings.AutoLiveview = checkBoxAutoLiveview.Checked;
+            DriverCommon.Settings.Personality = (int)comboBoxPersonality.SelectedValue;
+            DriverCommon.Settings.BulbModeEnable = checkBoxBulbMode.Checked;
+            DriverCommon.Settings.BulbModeTime = short.Parse(textBoxBulbMode.Text.Trim());
+            DriverCommon.Settings.AllowISOAdjust = checkBoxAllowISOAdjust.Checked;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -72,7 +70,7 @@ namespace ASCOM.SonyMirrorless
         private void InitUI()
         {
             InInit = true;
-            chkTrace.Checked = Camera.tl.Enabled;
+            chkTrace.Checked = DriverCommon.Settings.EnableLogging;
             SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
             String selected = "";
 
@@ -82,7 +80,7 @@ namespace ASCOM.SonyMirrorless
             {
                 comboBoxCamera.Items.Add(candidate.DisplayName);
 
-                if (candidate.DisplayName == Camera.deviceId)
+                if (candidate.DisplayName == DriverCommon.Settings.DeviceId)
                 {
                     selected = candidate.DisplayName;
                 }
@@ -93,17 +91,17 @@ namespace ASCOM.SonyMirrorless
                 comboBoxCamera.SelectedItem = selected;
             }
 
-            checkBoxEnableSaveLocation.Checked = Camera.SaveRawImageData;
-            textBoxSaveLocation.Enabled = Camera.SaveRawImageData;
-            textBoxSaveLocation.Text = Camera.SaveRawImageFolder;
+            checkBoxEnableSaveLocation.Checked = DriverCommon.Settings.ARWAutosave;
+            textBoxSaveLocation.Enabled = DriverCommon.Settings.ARWAutosave;
+            textBoxSaveLocation.Text = DriverCommon.Settings.ARWAutosaveFolder;
             checkBoxAppendDate.Enabled = textBoxSaveLocation.Enabled;
-            checkBoxAppendDate.Checked = Camera.SaveRawImageFolderWithDate;
+            checkBoxAppendDate.Checked = DriverCommon.Settings.ARWAutosaveWithDate;
             checkBoxCreateMultipleDirectories.Enabled = textBoxSaveLocation.Enabled;
-            checkBoxCreateMultipleDirectories.Checked = Camera.SaveRawImageCreateMultipleDirectories;
+            checkBoxCreateMultipleDirectories.Checked = DriverCommon.Settings.ARWAutosaveAlwaysCreateEmptyFolder;
 
-            buttonSelectFolder.Enabled = Camera.SaveRawImageData;
-            checkBoxUseLiveview.Checked = Camera.UseLiveview;
-            checkBoxAutoLiveview.Checked = Camera.AutoLiveview;
+            buttonSelectFolder.Enabled = DriverCommon.Settings.ARWAutosave;
+            checkBoxUseLiveview.Checked = DriverCommon.Settings.UseLiveview;
+            checkBoxAutoLiveview.Checked = DriverCommon.Settings.AutoLiveview;
 
             Dictionary<int, string> personalities = new Dictionary<int, string>();
 
@@ -115,17 +113,17 @@ namespace ASCOM.SonyMirrorless
             comboBoxPersonality.DisplayMember = "Value";
             comboBoxPersonality.ValueMember = "Key";
 
-            comboBoxPersonality.SelectedValue = Camera.Personality;
+            comboBoxPersonality.SelectedValue = DriverCommon.Settings.Personality;
 
-            checkBoxBulbMode.Checked = Camera.BulbModeEnable;
-            textBoxBulbMode.Text = Camera.BulbModeTime.ToString();
+            checkBoxBulbMode.Checked = DriverCommon.Settings.BulbModeEnable;
+            textBoxBulbMode.Text = DriverCommon.Settings.BulbModeTime.ToString();
             textBoxBulbMode.Enabled = checkBoxBulbMode.Checked;
 
-            checkBoxAllowISOAdjust.Checked = Camera.AllowISOAdjust;
+            checkBoxAllowISOAdjust.Checked = DriverCommon.Settings.AllowISOAdjust;
 
             PopulateOutputFormats();
 
-            comboBoxOutputFormat.SelectedValue = Camera.defaultReadoutMode;
+            comboBoxOutputFormat.SelectedValue = DriverCommon.Settings.DefaultReadoutMode;
 
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersion = FileVersionInfo.GetVersionInfo(assembly.Location);

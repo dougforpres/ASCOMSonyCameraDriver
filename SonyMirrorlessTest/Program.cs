@@ -50,15 +50,15 @@ namespace ASCOM.SonyMirrorless
 
             ArrayList modes = device.ReadoutModes;
 
-            device.FastReadout = true;
+            device.FastReadout = false;
 
 //            Console.WriteLine(device.Gain);
 //            device.Gain = 10;
 //            Console.WriteLine(device.Gains.ToString());
             Console.WriteLine(device.MaxADU.ToString());
 
-/*            while (true)
-            {
+//            while (true)
+              {
                 device.StartExposure(0.1, true);
 
                 for (int i = 0; i < 100 && !device.ImageReady; i++)
@@ -69,7 +69,7 @@ namespace ASCOM.SonyMirrorless
                 Console.WriteLine("Got an image #" + count.ToString());
                 GC.Collect();
             }
-            */
+//            */
             device.Connected = false;
             Console.WriteLine("Press Enter to finish");
             Console.ReadLine();

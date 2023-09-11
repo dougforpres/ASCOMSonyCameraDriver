@@ -33,6 +33,7 @@ namespace ASCOM.SonyMirrorless
 
         public const UInt16 PROPERTY_ISO = 0xd21e;
         public const UInt16 PROPERTY_ISO_OPTIONS = 0xfffe;
+        public const UInt16 PROPERTY_FOCUS_CONTROL = 0xd2d1;
 
         protected const UInt32 CAMERA_SUPPORTS_LIVEVIEW = 0x00000001;
 
@@ -81,6 +82,8 @@ namespace ASCOM.SonyMirrorless
             public UInt32 Width;
             public UInt32 Height;
             public UInt32 Flags;
+            public UInt32 MetaDataSize;
+            public IntPtr MetaData;
             public Double ExposureTime;
         }
 

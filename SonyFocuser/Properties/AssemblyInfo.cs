@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 //
 // TODO - Add your authorship information here
-[assembly: AssemblyTitle("ASCOM.SonyMirrorless.Camera")]
-[assembly: AssemblyDescription("ASCOM Camera driver for Sony Mirrorless")]
+[assembly: AssemblyTitle("ASCOM.SonyCameraFocuser.Focuser")]
+[assembly: AssemblyDescription("ASCOM Focuser driver for SonyCameraFocuser")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Doug Henderson")]
-[assembly: AssemblyProduct("ASCOM Camera driver for Sony Mirrorless")]
-[assembly: AssemblyCopyright("Driver Copyright © 2019-2023 D. Henderson")]
+[assembly: AssemblyCompany("The ASCOM Initiative")]
+[assembly: AssemblyProduct("ASCOM Focuser driver for SonyCameraFocuser")]
+[assembly: AssemblyCopyright("Copyright © 2023 The ASCOM Initiative")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(true)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d1878833-462b-4479-93e5-d7194475556a")]
+[assembly: Guid("87d12cc9-56d5-4e38-88e0-4cbf82868041")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("1.0.1.4")]
-[assembly: AssemblyFileVersion("1.0.1.4")]
+[assembly: AssemblyVersion("6.4.0.0")]
+[assembly: AssemblyFileVersion("6.4.0.0")]

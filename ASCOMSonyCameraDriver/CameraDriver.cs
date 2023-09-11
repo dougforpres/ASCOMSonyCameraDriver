@@ -7,7 +7,7 @@
 //				Communicates using USB connection.
 //
 // Implements:	ASCOM Camera interface version: 2
-// Author:		(2019) Doug Henderson <dougforpres@hotmail.com>
+// Author:		(2019) Doug Henderson <retrodotkiwi@gmail.com>
 //
 // Edit Log:
 //
@@ -53,43 +53,6 @@ namespace ASCOM.SonyMirrorless
     public class Camera : ICameraV2
     {
         /// <summary>
-        /// ASCOM DeviceID (COM ProgID) for this driver.
-        /// The DeviceID is used by ASCOM applications to load the driver at runtime.
-        /// </summary>
-        internal static string driverID = "ASCOM.SonyMirrorless.Camera";
-
-        /// <summary>
-        /// Driver description that displays in the ASCOM Chooser.
-        /// </summary>
-        private readonly static string driverDescription = "Sony Mirrorless Camera";
-
-        internal static string traceStateProfileName = "Trace Level";
-        internal static string traceStateDefault = "false";
-        internal static string cameraProfileName = "Camera ID";
-        internal static string cameraDefault = "";
-        internal static string readoutModeDefaultProfileName = "Readout Mode";
-        internal static string readoutModeDefault = "0";
-        internal static string useLiveviewProfileName = "Use Camera Liveview";
-        internal static string useLiveviewDefault = "true";
-        internal static string autoLiveviewProfileName = "Auto Liveview";
-        internal static string autoLiveviewDefault = "false";
-        internal static string personalityProfileName = "Personality";
-        internal static string personalityDefault = "1";
-        internal static string bulbModeEnableProfileName = "Bulb Mode Enable";
-        internal static string bulbModeEnableDefault = "true";
-        internal static string bulbModeTimeProfileName = "Bulb Mode Time";
-        internal static string bulbModeTimeDefault = "1";
-        internal static string allowISOAdjustProfileName = "Allow ISO Adjust";
-        internal static string allowISOAdjustDefault = "false";
-
-        internal static string deviceId; // Variables to hold the currrent device configuration
-
-        /// <summary>
-        /// Private variable to hold the camera object
-        /// </summary>
-        internal static SonyCamera camera = null;
-
-        /// <summary>
         /// Private variable to hold an ASCOM Utilities object
         /// </summary>
         private Util utilities;
@@ -102,21 +65,12 @@ namespace ASCOM.SonyMirrorless
         /// <summary>
         /// Variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
         /// </summary>
-        internal static TraceLogger tl;
-
-        internal static short defaultReadoutMode = SonyCommon.OUTPUTFORMAT_RGB;
-        internal static bool SaveRawImageData = false;
-        internal static bool SaveRawImageFolderWithDate = false;
-        internal static bool SaveRawImageCreateMultipleDirectories = false;
-        internal static string SaveRawImageFolder = "";
-        internal static bool UseLiveview = false;
-        internal static bool AutoLiveview = false;
-        internal static int Personality = SonyCommon.PERSONALITY_APT;
-        internal static bool BulbModeEnable = false;
-        internal static short BulbModeTime = 1;
-        internal static bool AllowISOAdjust = false;
 
         internal static bool LastSetFastReadout = false;
+        internal static int RequestedStartX = 0;
+        internal static int RequestedStartY = 0;
+        internal static int RequestedWidth = -1;
+        internal static int RequestedHeight = -1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="a6400"/> class.
@@ -124,16 +78,14 @@ namespace ASCOM.SonyMirrorless
         /// </summary>
         public Camera()
         {
-            tl = new TraceLogger("", "SonyMirrorless");
+            DriverCommon.ReadProfile(); // Read device configuration from the ASCOM Profile store
 
-            ReadProfile(); // Read device configuration from the ASCOM Profile store
-
-            tl.LogMessage("Camera", "Starting initialisation");
+            DriverCommon.LogCameraMessage("Camera", "Starting initialisation");
 
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
 
-            tl.LogMessage("Camera", "Completed initialisation");
+            DriverCommon.LogCameraMessage("Camera", "Completed initialisation");
         }
 
         //
@@ -154,39 +106,39 @@ namespace ASCOM.SonyMirrorless
             // or call a different dialog if connected
             //            if (IsConnected)
             //                System.Windows.Forms.MessageBox.Show("Camera is currently connected.  Some options are only available when not connected, these will be disabled.");
-            LogMessage("SetupDialog", "[in]");
+            DriverCommon.LogCameraMessage("SetupDialog", "[in]");
 
-            using (SetupDialogForm F = new SetupDialogForm(this))
+            using (SetupDialogForm F = new SetupDialogForm())
             {
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
-                    WriteProfile(); // Persist device configuration values to the ASCOM Profile store
+                    DriverCommon.WriteProfile(); // Persist device configuration values to the ASCOM Profile store
 
                     // Update connected camera with bulb mode info
-                    if (camera != null)
+                    if (DriverCommon.Camera != null)
                     {
-                        camera.BulbMode = BulbModeEnable;
-                        camera.BulbModeTime = BulbModeTime;
+                        DriverCommon.Camera.BulbMode = DriverCommon.Settings.BulbModeEnable;
+                        DriverCommon.Camera.BulbModeTime = DriverCommon.Settings.BulbModeTime;
                     }
                 }
             }
 
-            LogMessage("SetupDialog", "[out]");
+            DriverCommon.LogCameraMessage("SetupDialog", "[out]");
         }
 
         public ArrayList SupportedActions
         {
             get
             {
-                tl.LogMessage("SupportedActions Get", "Returning empty arraylist");
+                DriverCommon.LogCameraMessage("SupportedActions Get", "Returning empty arraylist");
                 return new ArrayList();
             }
         }
 
         public string Action(string actionName, string actionParameters)
         {
-            LogMessage("", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
+            DriverCommon.LogCameraMessage("", $"Action {actionName}, parameters {actionParameters} not implemented");
             throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
         }
 
@@ -194,7 +146,7 @@ namespace ASCOM.SonyMirrorless
         {
             CheckConnected("CommandBlind");
             // Call CommandString and return as soon as it finishes
-            this.CommandString(command, raw);
+//            this.CommandString(command, raw);
             // or
             throw new ASCOM.MethodNotImplementedException("CommandBlind");
             // DO NOT have both these sections!  One or the other
@@ -203,7 +155,7 @@ namespace ASCOM.SonyMirrorless
         public bool CommandBool(string command, bool raw)
         {
             CheckConnected("CommandBool");
-            string ret = CommandString(command, raw);
+//            string ret = CommandString(command, raw);
             // TODO decode the return string and return true or false
             // or
             throw new ASCOM.MethodNotImplementedException("CommandBool");
@@ -222,17 +174,10 @@ namespace ASCOM.SonyMirrorless
 
         public void Dispose()
         {
-            LogMessage("Dispose", "Disposing");
-            // Clean up the tracelogger and util objects
-            if (camera != null)
-            {
-                Connected = false;
-                camera = null;
-            }
+            DriverCommon.LogCameraMessage("Dispose", "Disposing");
+ 
+            Connected = false;
 
-            tl.Enabled = false;
-            tl.Dispose();
-            tl = null;
             utilities.Dispose();
             utilities = null;
             astroUtilities.Dispose();
@@ -245,91 +190,30 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_Connected"))
                 {
-                    if (camera != null)
-                    {
-                        LogMessage("Connected", "Get {0}", camera.Connected);
+                    DriverCommon.LogCameraMessage("Connected", "Get {0}", DriverCommon.CameraConnected.ToString());
 
-                        return camera.Connected;
-                    }
-                    else
-                    {
-                        LogMessage("Camera not yet specified/created", "");
-
-                        return false;
-                    }
+                    return DriverCommon.CameraConnected;
                 }
             }
             set
             {
                 using (new SerializedAccess(this, "set_Connected"))
                 {
-                    if (value && camera == null)
+                    DriverCommon.LogCameraMessage("Connected", "Set {0}", value.ToString());
+
+                    if (value && !DriverCommon.CameraConnected && DriverCommon.Settings.DeviceId == "")
                     {
-                        LogMessage("connected", "Camera is NULL", "");
-                        LogMessage("connected", "deviceId = '{0}'", deviceId);
-
-                        // See if we can create a camera using deviceId
-                        if (deviceId == "")
-                        {
-                            SetupDialog();
-                        }
-
-                        if (deviceId != "")
-                        {
-                            SonyCameraEnumerator enumerator = new SonyCameraEnumerator();
-
-                            foreach (SonyCamera candidate in enumerator.Cameras)
-                            {
-                                if (camera == null && candidate.DisplayName == deviceId)
-                                {
-                                    LogMessage("connected", "Found info... creating camera obj", "");
-                                    camera = candidate;
-                                    camera.Logger = tl;
-                                    cameraNumX = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
-                                    cameraNumY = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
-
-                                    switch (defaultReadoutMode)
-                                    {
-                                        case 0:
-                                            camera.OutputMode = SonyCamera.ImageMode.RGB;
-                                            break;
-
-                                        case 1:
-                                            camera.OutputMode = SonyCamera.ImageMode.RGGB;
-                                            break;
-                                    }
-
-                                    camera.BulbMode = BulbModeEnable;
-                                    camera.BulbModeTime = BulbModeTime;
-                                }
-                            }
-                        }
+                        // Need to display setup dialog
+                        SetupDialog();
                     }
 
-                    if (camera != null)
+                    if (DriverCommon.Settings.DeviceId != "")
                     {
-                        LogMessage("Connected", "Set {0}", value);
-
-                        if (value == camera.Connected)
-                            return;
-
-                        if (value)
-                        {
-                            LogMessage("Connected Set", "Connecting to camera {0}", deviceId);
-                            camera.Connected = true;
-                        }
-                        else
-                        {
-                            LogMessage("Connected Set", "Disconnecting from camera {0}", deviceId);
-                            camera.Connected = false;
-
-                            // Trash the camera in the event the driver id changes
-                            camera = null;
-                        }
+                        DriverCommon.CameraConnected = value;
                     }
                     else
                     {
-                        tl.LogMessage("Connected Set", "Camera not yet specified");
+                        DriverCommon.LogCameraMessage("Connected Set", "Camera not yet specified");
                     }
                 }
             }
@@ -337,11 +221,9 @@ namespace ASCOM.SonyMirrorless
 
         public string Description
         {
-            // TODO customise this device description
             get
             {
-                tl.LogMessage("Description Get", driverDescription);
-                return driverDescription;
+                return DriverCommon.CameraDriverDescription;
             }
         }
 
@@ -349,11 +231,7 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-//                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                // TODO customise this driver description
-                string driverInfo = "Sony Camera Driver.\nHelp/Support: <retrodotkiwi@gmail.com>.";
-                tl.LogMessage("DriverInfo Get", driverInfo);
-                return driverInfo;
+                return DriverCommon.CameraDriverInfo;
             }
         }
 
@@ -361,19 +239,14 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
-                tl.LogMessage("DriverVersion Get", driverVersion);
-                return driverVersion;
+                return DriverCommon.DriverVersion;
             }
         }
 
         public short InterfaceVersion
         {
-            // set by the driver wizard
             get
             {
-                LogMessage("InterfaceVersion Get", "2");
                 return Convert.ToInt16("2");
             }
         }
@@ -382,13 +255,7 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                // IMPORTANT
-                // This string cannot change, the APT software recognizes this name specifically and enables fast-readout
-                // for preview mode.
-                // "Sony Mirrorless Camera"
-                string name = "Sony Mirrorless Camera";
-                tl.LogMessage("Name Get", name);
-                return name;
+                return DriverCommon.CameraDriverName;
             }
         }
 
@@ -396,21 +263,13 @@ namespace ASCOM.SonyMirrorless
 
         #region ICamera Implementation
 
-        private const int default_ccdWidth = 6024; // Constants to define the ccd pixel dimenstions
-        private const int default_ccdHeight = 4024;
-
-        private int cameraNumX = default_ccdWidth; // Initialise variables to hold values required for functionality tested by Conform
-        private int cameraNumY = default_ccdHeight;
-        private int cameraStartX = 0;
-        private int cameraStartY = 0;
-
         public void AbortExposure()
         {
             using (new SerializedAccess(this, "AbortExposure()"))
             {
-                tl.LogMessage("AbortExposure", "Attempting to cancel any in-progress capture");
+                DriverCommon.LogCameraMessage("AbortExposure", "Attempting to cancel any in-progress capture");
 
-                camera.StopCapture();
+                DriverCommon.Camera.StopCapture();
             }
         }
 
@@ -420,9 +279,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_BayerOffsetX"))
                 {
-                    tl.LogMessage("BayerOffsetX Get Get", "");
+                    DriverCommon.LogCameraMessage("BayerOffsetX Get Get", "");
 
-                    return (short)camera.Info.BayerXOffset;
+                    return (short)DriverCommon.Camera.Info.BayerXOffset;
                 }
             }
         }
@@ -433,9 +292,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_BayerOffsetY"))
                 {
-                    tl.LogMessage("BayerOffsetY Get Get", "");
+                    DriverCommon.LogCameraMessage("BayerOffsetY Get Get", "");
 
-                    return (short)camera.Info.BayerYOffset;
+                    return (short)DriverCommon.Camera.Info.BayerYOffset;
                 }
             }
         }
@@ -446,7 +305,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_BinX"))
                 {
-                    tl.LogMessage("BinX Get", "1");
+                    DriverCommon.LogCameraMessage("BinX Get", "1");
 
                     return 1;
                 }
@@ -455,7 +314,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_BinX"))
                 {
-                    tl.LogMessage("BinX Set", value.ToString());
+                    DriverCommon.LogCameraMessage("BinX Set", value.ToString());
 
                     if (value != 1) throw new ASCOM.InvalidValueException("BinX", value.ToString(), "1"); // Only 1 is valid in this simple template
                 }
@@ -468,7 +327,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_BinY"))
                 {
-                    tl.LogMessage("BinY Get", "1");
+                    DriverCommon.LogCameraMessage("BinY Get", "1");
 
                     return 1;
                 }
@@ -477,7 +336,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_BinY"))
                 {
-                    tl.LogMessage("BinY Set", value.ToString());
+                    DriverCommon.LogCameraMessage("BinY Set", value.ToString());
 
                     if (value != 1) throw new ASCOM.InvalidValueException("BinY", value.ToString(), "1"); // Only 1 is valid in this simple template
                 }
@@ -490,7 +349,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CCDTemperature"))
                 {
-                    tl.LogMessage("CCDTemperature Get Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("CCDTemperature Get Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("CCDTemperature", false);
                 }
@@ -503,9 +362,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CameraState", true))
                 {
-                    tl.LogMessage("CameraState Get", camera.State.ToString());
+                    DriverCommon.LogCameraMessage("CameraState Get", DriverCommon.Camera.State.ToString());
 
-                    return camera.State;
+                    return DriverCommon.Camera.State;
                 }
             }
         }
@@ -516,8 +375,8 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CameraXSize", true))
                 {
-                    int x = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageWidthPixels : camera.Info.ImageWidthCroppedPixels);
-                    tl.LogMessage("CameraXSize Get", x.ToString());
+                    int x = (int)(DriverCommon.Camera.Info.CropMode == 0 ? DriverCommon.Camera.Info.ImageWidthPixels : DriverCommon.Camera.Info.ImageWidthCroppedPixels);
+                    DriverCommon.LogCameraMessage("CameraXSize Get", x.ToString());
 
                     return x;
                 }
@@ -530,8 +389,8 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CameraYSize", true))
                 {
-                    int y = (int)(camera.Info.CropMode == 0 ? camera.Info.ImageHeightPixels : camera.Info.ImageHeightCroppedPixels);
-                    tl.LogMessage("CameraYSize Get", y.ToString());
+                    int y = (int)(DriverCommon.Camera.Info.CropMode == 0 ? DriverCommon.Camera.Info.ImageHeightPixels : DriverCommon.Camera.Info.ImageHeightCroppedPixels);
+                    DriverCommon.LogCameraMessage("CameraYSize Get", y.ToString());
 
                     return y;
                 }
@@ -544,7 +403,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanAbortExposure"))
                 {
-                    tl.LogMessage("CanAbortExposure Get", true.ToString());
+                    DriverCommon.LogCameraMessage("CanAbortExposure Get", true.ToString());
 
                     return true;
                 }
@@ -557,7 +416,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanAsymmetricBin"))
                 {
-                    tl.LogMessage("CanAsymmetricBin Get", false.ToString());
+                    DriverCommon.LogCameraMessage("CanAsymmetricBin Get", false.ToString());
 
                     return false;
                 }
@@ -570,9 +429,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanFastReadout"))
                 {
-                    bool result = Personality != SonyCommon.PERSONALITY_NINA;
+                    bool result = DriverCommon.Settings.Personality != SonyCommon.PERSONALITY_NINA;
 
-                    tl.LogMessage("CanFastReadout Get", result.ToString());
+                    DriverCommon.LogCameraMessage("CanFastReadout Get", result.ToString());
 
                     return result;
                 }
@@ -585,7 +444,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanGetCoolerPower"))
                 {
-                    tl.LogMessage("CanGetCoolerPower Get", false.ToString());
+                    DriverCommon.LogCameraMessage("CanGetCoolerPower Get", false.ToString());
 
                     return false;
                 }
@@ -598,7 +457,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanPulseGuide"))
                 {
-                    tl.LogMessage("CanPulseGuide Get", false.ToString());
+                    DriverCommon.LogCameraMessage("CanPulseGuide Get", false.ToString());
 
                     return false;
                 }
@@ -611,7 +470,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanSetCCDTemperature"))
                 {
-                    tl.LogMessage("CanSetCCDTemperature Get", false.ToString());
+                    DriverCommon.LogCameraMessage("CanSetCCDTemperature Get", false.ToString());
 
                     return false;
                 }
@@ -624,7 +483,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CanStopExposure"))
                 {
-                    tl.LogMessage("CanStopExposure Get", true.ToString());
+                    DriverCommon.LogCameraMessage("CanStopExposure Get", true.ToString());
 
                     return true;
                 }
@@ -637,7 +496,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CoolerOn"))
                 {
-                    tl.LogMessage("CoolerOn Get Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("CoolerOn Get Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("CoolerOn", false);
                 }
@@ -646,7 +505,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_CoolerOn"))
                 {
-                    tl.LogMessage("CoolerOn Set Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("CoolerOn Set Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("CoolerOn", true);
                 }
@@ -659,7 +518,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_CoolerPower"))
                 {
-                    tl.LogMessage("CoolerPower Get Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("CoolerPower Get Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("CoolerPower", false);
                 }
@@ -672,7 +531,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ElectronsPerADU"))
                 {
-                    tl.LogMessage("ElectronsPerADU Get Get", "Not implemented");
+                    DriverCommon.LogCameraMessage("ElectronsPerADU Get Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("ElectronsPerADU", false);
                 }
@@ -685,9 +544,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ExposureMax", true))
                 {
-                    tl.LogMessage("ExposureMax Get Get", camera.Info.ExposureTimeMax.ToString());
+                    DriverCommon.LogCameraMessage("ExposureMax Get Get", DriverCommon.Camera.Info.ExposureTimeMax.ToString());
 
-                    return camera.Info.ExposureTimeMax;
+                    return DriverCommon.Camera.Info.ExposureTimeMax;
                 }
             }
         }
@@ -698,9 +557,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ExposureMin", true))
                 {
-                    tl.LogMessage("ExposureMin Get", camera.Info.ExposureTimeMin.ToString());
+                    DriverCommon.LogCameraMessage("ExposureMin Get", DriverCommon.Camera.Info.ExposureTimeMin.ToString());
 
-                    return camera.Info.ExposureTimeMin;
+                    return DriverCommon.Camera.Info.ExposureTimeMin;
                 }
             }
         }
@@ -711,9 +570,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ExposureResolution", true))
                 {
-                    tl.LogMessage("ExposureResolution Get", camera.Info.ExposureTimeStep.ToString());
+                    DriverCommon.LogCameraMessage("ExposureResolution Get", DriverCommon.Camera.Info.ExposureTimeStep.ToString());
 
-                    return camera.Info.ExposureTimeStep;
+                    return DriverCommon.Camera.Info.ExposureTimeStep;
                 }
             }
         }
@@ -724,19 +583,19 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_FastReadout", true))
                 {
-                    tl.LogMessage("FastReadout Get", camera.Mode.Preview.ToString());
+                    DriverCommon.LogCameraMessage("FastReadout Get", DriverCommon.Camera.Mode.Preview.ToString());
 
-                    return camera.PreviewMode;
+                    return DriverCommon.Camera.PreviewMode;
                 }
             }
             set
             {
                 using (new SerializedAccess(this, "set_FastReadout", true))
                 {
-                    value = value && UseLiveview;
+                    value = value && DriverCommon.Settings.UseLiveview;
 
-                    tl.LogMessage("FastReadout Set", value.ToString());
-                    camera.PreviewMode = value;
+                    DriverCommon.LogCameraMessage("FastReadout Set", value.ToString());
+                    DriverCommon.Camera.PreviewMode = value;
                     LastSetFastReadout = value;
                 }
             }
@@ -748,7 +607,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_FullWellCapacity"))
                 {
-                    tl.LogMessage("FullWellCapacity Get", "Not implemented");
+                    DriverCommon.LogCameraMessage("FullWellCapacity Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("FullWellCapacity", false);
                 }
@@ -763,10 +622,10 @@ namespace ASCOM.SonyMirrorless
                 {
                     if (Connected)
                     {
-                        if (AllowISOAdjust && camera.Gains.Count > 0)
+                        if (DriverCommon.Settings.AllowISOAdjust && DriverCommon.Camera.Gains.Count > 0)
                         {
-                            short gainIndex = camera.GainIndex;
-                            tl.LogMessage("Gain Get", gainIndex.ToString());
+                            short gainIndex = DriverCommon.Camera.GainIndex;
+                            DriverCommon.LogCameraMessage("Gain Get", gainIndex.ToString());
 
                             return gainIndex;
                         }
@@ -788,10 +647,10 @@ namespace ASCOM.SonyMirrorless
                 {
                     if (Connected)
                     {
-                        if (AllowISOAdjust && camera.Gains.Count > 0)
+                        if (DriverCommon.Settings.AllowISOAdjust && DriverCommon.Camera.Gains.Count > 0)
                         {
-                            camera.GainIndex = value;
-                            tl.LogMessage("Gain Set", value.ToString());
+                            DriverCommon.Camera.GainIndex = value;
+                            DriverCommon.LogCameraMessage("Gain Set", value.ToString());
                         }
                         else
                         {
@@ -812,7 +671,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_GainMax"))
                 {
-                    tl.LogMessage("GainMax Get", "Not implemented");
+                    DriverCommon.LogCameraMessage("GainMax Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("GainMax", false);
                 }
@@ -825,7 +684,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_GainMin"))
                 {
-                    tl.LogMessage("GainMin Get", "Not implemented");
+                    DriverCommon.LogCameraMessage("GainMin Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("GainMin", true);
                 }
@@ -840,12 +699,12 @@ namespace ASCOM.SonyMirrorless
                 {
                     if (Connected)
                     {
-                        ArrayList gains = camera.Gains;
+                        ArrayList gains = DriverCommon.Camera.Gains;
 
-                        if (AllowISOAdjust && gains.Count > 0)
+                        if (DriverCommon.Settings.AllowISOAdjust && gains.Count > 0)
                         {
 
-                            tl.LogMessage("Gains Get", String.Format("Size = {0}", gains.Count));
+                            DriverCommon.LogCameraMessage("Gains Get", String.Format("Size = {0}", gains.Count));
 
                             return gains;
                         }
@@ -868,7 +727,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_HasShutter"))
                 {
-                    tl.LogMessage("HasShutter Get", true.ToString());
+                    DriverCommon.LogCameraMessage("HasShutter Get", true.ToString());
 
                     return true;
                 }
@@ -881,11 +740,60 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_HeatSinkTemperature"))
                 {
-                    tl.LogMessage("HeatSinkTemperature Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("HeatSinkTemperature Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("HeatSinkTemperature", false);
                 }
             }
+        }
+
+        private object ImageData()
+        {
+            object result = null;
+
+            if (DriverCommon.Camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+            {
+                DriverCommon.LogCameraMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
+                throw new ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!");
+            }
+
+            SonyImage image = DriverCommon.Camera.LastImage;
+
+            int requestedWidth = NumX;
+            int requestedHeight = NumY;
+            DriverCommon.LogCameraMessage("ImageArray", "requestedWidth = {0}, cameraNumX = {1}, camera.Mode.ImageWidth = {2}", (int)Math.Min(DriverCommon.Settings.ImageWidth, DriverCommon.Camera.Mode.ImageWidthPixels), DriverCommon.Settings.ImageWidth, DriverCommon.Camera.Mode.ImageWidthPixels);
+            DriverCommon.LogCameraMessage("ImageArray Get", String.Format("(numX = {0}, numY = {1}, image.Width = {2}, image.Height = {3})", requestedWidth, requestedHeight, image.Width, image.Height));
+
+            switch (image.m_info.ImageMode)
+            {
+                case 1:
+                    DriverCommon.LogCameraMessage("BAYER info", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+
+                    result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
+                    break;
+
+                case 2:
+                    if (DriverCommon.Settings.Personality != SonyCommon.PERSONALITY_NINA)
+                    {
+                        DriverCommon.LogCameraMessage("RGB info", String.Format("Dimensions = {0}, {1} x {2} x {3}", SonyImage.RGB.Rank, SonyImage.RGB.GetLength(0), SonyImage.RGB.GetLength(1), SonyImage.RGB.GetLength(2)));
+
+                        result = Resize(SonyImage.RGB, SonyImage.RGB.Rank, StartX, StartY, requestedWidth, requestedHeight);
+                    }
+                    else
+                    {
+                        DriverCommon.LogCameraMessage("RGB info as MONO", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+
+                        result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
+                    }
+                    break;
+
+                default:
+                    DriverCommon.LogCameraMessage("Unknown info", String.Format("{0} - Throwing", image.m_info.ImageMode));
+
+                    throw new ASCOM.InvalidOperationException("Call to ImageArray resulted in invalid image type!");
+            }
+
+            return result;
         }
 
         public object ImageArray
@@ -894,65 +802,53 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ImageArray", true))
                 {
-                    object result = null;
+                    return ImageData();
 
-                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    /*object result = null;
+
+                    if (DriverCommon.Camera.LastImage.Status != SonyImage.ImageStatus.Ready)
                     {
-                        tl.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
+                        DriverCommon.LogCameraMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
                         throw new ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!");
                     }
 
-                    SonyImage image = camera.LastImage;
+                    SonyImage image = DriverCommon.Camera.LastImage;
 
                     int requestedWidth = NumX;
                     int requestedHeight = NumY;
-                    LogMessage("ImageArray", "requestedWidth = {0}, cameraNumX = {1}, camera.Mode.ImageWidth = {2}", (int)Math.Min(cameraNumX, camera.Mode.ImageWidthPixels), cameraNumX, camera.Mode.ImageWidthPixels);
-
-                    tl.LogMessage("ImageArray Get", String.Format("(numX = {0}, numY = {1}, image.Width = {2}, image.Height = {3})", requestedWidth, requestedHeight, image.Width, image.Height));
+                    DriverCommon.LogCameraMessage("ImageArray", "requestedWidth = {0}, cameraNumX = {1}, camera.Mode.ImageWidth = {2}", (int)Math.Min(DriverCommon.Settings.ImageWidth, DriverCommon.Camera.Mode.ImageWidthPixels), DriverCommon.Settings.ImageWidth, DriverCommon.Camera.Mode.ImageWidthPixels);
+                    DriverCommon.LogCameraMessage("ImageArray Get", String.Format("(numX = {0}, numY = {1}, image.Width = {2}, image.Height = {3})", requestedWidth, requestedHeight, image.Width, image.Height));
 
                     switch (image.m_info.ImageMode)
                     {
                         case 1:
-                            tl.LogMessage("BAYER info", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+                            DriverCommon.LogCameraMessage("BAYER info", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
 
                             result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
                             break;
 
                         case 2:
-                            if (Personality != SonyCommon.PERSONALITY_NINA)
+                            if (DriverCommon.Settings.Personality != SonyCommon.PERSONALITY_NINA)
                             {
-                                tl.LogMessage("RGB info", String.Format("Dimensions = {0}, {1} x {2} x {3}", SonyImage.RGB.Rank, SonyImage.RGB.GetLength(0), SonyImage.RGB.GetLength(1), SonyImage.RGB.GetLength(2)));
+                                DriverCommon.LogCameraMessage("RGB info", String.Format("Dimensions = {0}, {1} x {2} x {3}", SonyImage.RGB.Rank, SonyImage.RGB.GetLength(0), SonyImage.RGB.GetLength(1), SonyImage.RGB.GetLength(2)));
 
                                 result = Resize(SonyImage.RGB, SonyImage.RGB.Rank, StartX, StartY, requestedWidth, requestedHeight);
                             }
                             else
                             {
-                                tl.LogMessage("RGB info as MONO", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
+                                DriverCommon.LogCameraMessage("RGB info as MONO", String.Format("Dimensions = {0}, {1} x {2}", SonyImage.BAYER.Rank, SonyImage.BAYER.GetLength(0), SonyImage.BAYER.GetLength(1)));
 
                                 result = Resize(SonyImage.BAYER, SonyImage.BAYER.Rank, StartX, StartY, requestedWidth, requestedHeight);
                             }
                             break;
 
                         default:
-                            tl.LogMessage("Unknown info", String.Format("{0} - Throwing", image.m_info.ImageMode));
+                             DriverCommon.LogCameraMessage("Unknown info", String.Format("{0} - Throwing", image.m_info.ImageMode));
 
                             throw new ASCOM.InvalidOperationException("Call to ImageArray resulted in invalid image type!");
                     }
 
-/*                    using (var stream = new FileStream("c:\\users\\dougf\\test.bin", FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (var writer = new BinaryWriter(stream))
-                    {
-                        int[,] b = SonyImage.BAYER;
-                        for (int y = 0; y < b.GetLength(1); y+=2)
-                        {
-                            for (int x = 0; x < b.GetLength(0); x+=2)
-                            {
-                                writer.Write((ushort)b[x, y]);
-                            }
-                        }
-                    }
-*/
-                    return result;
+                    return result;*/
                 }
             }
         }
@@ -963,14 +859,61 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ImageArrayVariant", true))
                 {
-                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    SonyImage image = DriverCommon.Camera.LastImage;
+                    int x = 0;
+                    int y = 0;
+                    int c;
+
+                    switch (image.m_info.ImageMode)
                     {
-                        tl.LogMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!");
+                        case 1:     // RGGB
+                            int[,] rggbInput = (int[,])ImageData();
+                            x = rggbInput.GetLength(0);
+                            y = rggbInput.GetLength(1);
+                            object[,] rggbOutput = new object[x, y];
+
+                            for (int xcopy = 0; xcopy < x; xcopy++)
+                            {
+                                for (int ycopy = 0; ycopy < y; ycopy++)
+                                {
+                                    rggbOutput[xcopy, ycopy] = rggbInput[xcopy, ycopy];
+                                }
+                            }
+
+                            return rggbOutput;
+
+
+                        case 2:     // RGB
+                            int[,,] rgbInput = (int[,,])ImageData();
+                            x = rgbInput.GetLength(0);
+                            y = rgbInput.GetLength(1);
+                            c = rgbInput.GetLength(2);
+                            object[,,] rgbOutput = new object[x, y, c];
+
+                            for (int xcopy = 0; xcopy < x; xcopy++)
+                            {
+                                for (int ycopy = 0; ycopy < y; ycopy++)
+                                {
+                                    for (int ccopy = 0; ccopy < c; ccopy++)
+                                    {
+                                        rgbOutput[xcopy, ycopy, ccopy] = rgbInput[xcopy, ycopy, ccopy];
+                                    }
+                                }
+                            }
+
+                            return rgbOutput;
+
+                        default:
+                            throw new ASCOM.InvalidOperationException("Unable to detect picture format");
+                    }
+/*                    if (DriverCommon.Camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    {
+                        DriverCommon.LogCameraMessage("ImageArrayVariant Get", "Throwing InvalidOperationException because of a call to ImageArrayVariant before the first image has been taken!");
                         throw new ASCOM.InvalidOperationException("Call to ImageArrayVariant before the first image has been taken!");
                     }
-                    object[,,] cameraImageArrayVariant = new object[cameraNumX, cameraNumY, 3];
+                    object[,,] cameraImageArrayVariant = new object[DriverCommon.Settings.ImageWidth, DriverCommon.Settings.ImageHeight, 3];
 
-                    return cameraImageArrayVariant;
+                    return cameraImageArrayVariant;*/
                 }
             }
         }
@@ -981,9 +924,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ImageReady", true))
                 {
-                    bool ready = camera.ImageReady;
+                    bool ready = DriverCommon.Camera.ImageReady;
 
-                    tl.LogMessage("ImageReady Get", ready.ToString());
+                    DriverCommon.LogCameraMessage("ImageReady Get", ready.ToString());
 
                     return ready;
                 }
@@ -996,7 +939,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_IsPulseGuiding"))
                 {
-                    tl.LogMessage("IsPulseGuiding Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("IsPulseGuiding Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("IsPulseGuiding", false);
                 }
@@ -1009,14 +952,14 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_LastExposureDuration", true))
                 {
-                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    if (DriverCommon.Camera.LastImage.Status != SonyImage.ImageStatus.Ready)
                     {
-                        tl.LogMessage("LastExposureDuration Get", "Throwing InvalidOperationException because of a call to LastExposureDuration before the first image has been taken!");
+                        DriverCommon.LogCameraMessage("LastExposureDuration Get", "Throwing InvalidOperationException because of a call to LastExposureDuration before the first image has been taken!");
                         throw new ASCOM.InvalidOperationException("Call to LastExposureDuration before the first image has been taken!");
                     }
 
-                    double result = camera.LastImage.Duration;
-                    tl.LogMessage("LastExposureDuration Get", result.ToString());
+                    double result = DriverCommon.Camera.LastImage.Duration;
+                    DriverCommon.LogCameraMessage("LastExposureDuration Get", result.ToString());
 
                     return result;
                 }
@@ -1029,14 +972,14 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_LastExposureStartTime", true))
                 {
-                    if (camera.LastImage.Status != SonyImage.ImageStatus.Ready)
+                    if (DriverCommon.Camera.LastImage.Status != SonyImage.ImageStatus.Ready)
                     {
-                        tl.LogMessage("LastExposureStartTime Get", "Throwing InvalidOperationException because of a call to LastExposureStartTime before the first image has been taken!");
+                        DriverCommon.LogCameraMessage("LastExposureStartTime Get", "Throwing InvalidOperationException because of a call to LastExposureStartTime before the first image has been taken!");
                         throw new ASCOM.InvalidOperationException("Call to LastExposureStartTime before the first image has been taken!");
                     }
 
-                    string exposureStartString = camera.LastImage.StartTime.ToString("yyyy-MM-ddTHH:mm:ss");
-                    tl.LogMessage("LastExposureStartTime Get", exposureStartString.ToString());
+                    string exposureStartString = DriverCommon.Camera.LastImage.StartTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
+                    DriverCommon.LogCameraMessage("LastExposureStartTime Get", exposureStartString.ToString());
                     return exposureStartString;
                 }
             }
@@ -1048,10 +991,10 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_MaxADU"))
                 {
-                    int bpp = (int)camera.Info.BitsPerPixel;
+                    int bpp = (int)DriverCommon.Camera.Info.BitsPerPixel;
                     int maxADU = (1 << bpp) - 1;
 
-                    tl.LogMessage("MaxADU Get", maxADU.ToString());
+                    DriverCommon.LogCameraMessage("MaxADU Get", maxADU.ToString());
 
                     return maxADU;
                 }
@@ -1064,7 +1007,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_MaxBinX"))
                 {
-                    tl.LogMessage("MaxBinX Get", "1");
+//                    DriverCommon.LogCameraMessage("MaxBinX Get", "1");
 
                     return 1;
                 }
@@ -1077,7 +1020,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_MaxBinY"))
                 {
-                    tl.LogMessage("MaxBinY Get", "1");
+//                    DriverCommon.LogCameraMessage("MaxBinY Get", "1");
 
                     return 1;
                 }
@@ -1090,16 +1033,16 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_NumX", true))
                 {
-                    int x = (int)camera.Mode.ImageWidthPixels;
+                    int x = (int)DriverCommon.Camera.Mode.ImageWidthPixels;
 
-                    if (camera.ImageReady)
+                    if (DriverCommon.Camera.ImageReady)
                     {
-                        x = camera.LastImage.Width;
+                        x = DriverCommon.Camera.LastImage.Width;
                     }
 
-                    x = (int)Math.Min(cameraNumX, x);
+                    x = (int)Math.Min((RequestedWidth > 0 ? RequestedWidth : DriverCommon.Settings.ImageWidth), x);
 
-                    tl.LogMessage("NumX Get", x.ToString());
+                    DriverCommon.LogCameraMessage("NumX Get", x.ToString());
                     return x;
                 }
             }
@@ -1107,8 +1050,16 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_NumX", true))
                 {
-                    cameraNumX = value;
-                    tl.LogMessage("NumX set", value.ToString());
+                    if (value < 1 || (value + StartX) > DriverCommon.Settings.ImageWidth)
+                    {
+                        DriverCommon.LogCameraMessage("NumX", $"Attempt to set value {value} where StartX ({StartX}) + this would be greater than width ({DriverCommon.Settings.ImageWidth})");
+
+                        throw new ASCOM.InvalidValueException("Out of range");
+                    }
+
+                    RequestedWidth = value;
+//                    DriverCommon.Settings.ImageWidth = value;
+                    DriverCommon.LogCameraMessage("NumX set", value.ToString());
                 }
             }
         }
@@ -1119,16 +1070,16 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_NumY", true))
                 {
-                    int y = (int)camera.Mode.ImageHeightPixels;
+                    int y = (int)DriverCommon.Camera.Mode.ImageHeightPixels;
 
-                    if (camera.ImageReady)
+                    if (DriverCommon.Camera.ImageReady)
                     {
-                        y = camera.LastImage.Height;
+                        y = DriverCommon.Camera.LastImage.Height;
                     }
 
-                    y = (int)Math.Min(cameraNumY, y);
+                    y = (int)Math.Min((RequestedHeight > 0 ? RequestedHeight : DriverCommon.Settings.ImageHeight), y);
 
-                    tl.LogMessage("NumY Get", y.ToString());
+                    DriverCommon.LogCameraMessage("NumY Get", y.ToString());
                     return y;
                 }
             }
@@ -1136,9 +1087,17 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_NumY", true))
                 {
+                    if (value < 1 || (value + StartY) > DriverCommon.Settings.ImageHeight)
+                    {
+                        DriverCommon.LogCameraMessage("NumY", $"Attempt to set value {value} where StartY ({StartY}) + this would be greater than width ({DriverCommon.Settings.ImageHeight})");
+
+                        throw new ASCOM.InvalidValueException("Out of range");
+                    }
+
                     // NINA sets this before it changes readout mode
-                    cameraNumY = value;
-                    tl.LogMessage("NumY set", value.ToString());
+                    RequestedHeight = value;
+//                    DriverCommon.Settings.ImageHeight = value;
+                    DriverCommon.LogCameraMessage("NumY set", value.ToString());
                 }
             }
         }
@@ -1149,7 +1108,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_PercentCompleted"))
                 {
-                    tl.LogMessage("PercentCompleted Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("PercentCompleted Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("PercentCompleted", false);
                 }
@@ -1162,9 +1121,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_PixelSizeX", true))
                 {
-                    tl.LogMessage("PixelSizeX Get", camera.Info.PixelWidth.ToString());
+                    DriverCommon.LogCameraMessage("PixelSizeX Get", DriverCommon.Camera.Info.PixelWidth.ToString());
 
-                    return camera.Info.PixelWidth;
+                    return DriverCommon.Camera.Info.PixelWidth;
                 }
             }
         }
@@ -1175,9 +1134,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_PixelSizeY", true))
                 {
-                    tl.LogMessage("PixelSizeY Get", camera.Info.PixelHeight.ToString());
+                    DriverCommon.LogCameraMessage("PixelSizeY Get", DriverCommon.Camera.Info.PixelHeight.ToString());
 
-                    return camera.Info.PixelHeight;
+                    return DriverCommon.Camera.Info.PixelHeight;
                 }
             }
         }
@@ -1186,7 +1145,7 @@ namespace ASCOM.SonyMirrorless
         {
             using (new SerializedAccess(this, "PulseGuide()"))
             {
-                tl.LogMessage("PulseGuide", "Not implemented");
+                DriverCommon.LogCameraMessage("PulseGuide", "Not implemented");
 
                 throw new ASCOM.MethodNotImplementedException("PulseGuide");
             }
@@ -1198,9 +1157,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_ReadoutMode", true))
                 {
-                    tl.LogMessage("ReadoutMode Get", camera.OutputMode.ToString());
+                    DriverCommon.LogCameraMessage("ReadoutMode Get", DriverCommon.Camera.OutputMode.ToString());
 
-                    return (short)(camera.OutputMode - 1);
+                    return (short)(DriverCommon.Camera.OutputMode - 1);
                 }
             }
             set
@@ -1209,16 +1168,16 @@ namespace ASCOM.SonyMirrorless
                 {
                     if (ReadoutModes.Count > value)
                     {
-                        tl.LogMessage("ReadoutMode Set", value.ToString());
+                        DriverCommon.LogCameraMessage("ReadoutMode Set", value.ToString());
 
                         switch (value)
                         {
                             case 0:
-                                camera.PreviewMode = false;
+                                DriverCommon.Camera.PreviewMode = false;
                                 break;
 
                             case 1:
-                                camera.PreviewMode = true;
+                                DriverCommon.Camera.PreviewMode = true;
                                 break;
                         }
                     }
@@ -1237,19 +1196,21 @@ namespace ASCOM.SonyMirrorless
                 using (new SerializedAccess(this, "get_ReadoutModes", true))
                 {
                     ArrayList modes = new ArrayList();
+                    SonyCommon.CameraInfo info = DriverCommon.Camera.Resolutions;
+                    bool cropped = DriverCommon.Camera.Info.CropMode == 0;
 
-                    modes.Add(String.Format("Full Resolution ({0} x {1})", camera.Resolutions.ImageWidthPixels, camera.Resolutions.ImageHeightPixels));
+                    modes.Add(String.Format("Full Resolution ({0} x {1})", DriverCommon.Settings.ImageWidth, DriverCommon.Settings.ImageHeight));
 
-                    if (camera.HasLiveView)
+                    if (DriverCommon.Camera.HasLiveView)
                     {
-                        if (Personality == SonyCommon.PERSONALITY_NINA)
-                        {
-                            modes.Add(String.Format("LiveView ({0} x {1}) [Mono]", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
-                        }
-                        else
-                        {
-                            modes.Add(String.Format("LiveView ({0} x {1})", camera.Resolutions.PreviewWidthPixels, camera.Resolutions.PreviewHeightPixels));
-                        }
+//                        if (DriverCommon.Settings.Personality == SonyCommon.PERSONALITY_NINA)
+//                        {
+//                            modes.Add(String.Format("LiveView ({0} x {1}) [Mono]", DriverCommon.Camera.Resolutions.PreviewWidthPixels, DriverCommon.Camera.Resolutions.PreviewHeightPixels));
+//                        }
+//                        else
+//                        {
+                            modes.Add(String.Format("LiveView ({0} x {1})", DriverCommon.Camera.Resolutions.PreviewWidthPixels, DriverCommon.Camera.Resolutions.PreviewHeightPixels));
+//                        }
                     }
 
                     return modes;
@@ -1263,9 +1224,9 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_SensorName", true))
                 {
-                    tl.LogMessage("SensorName Get", camera.Info.SensorName);
+//                    DriverCommon.LogCameraMessage("SensorName Get", DriverCommon.Camera.Info.SensorName);
 
-                    return camera.Info.SensorName;
+                    return DriverCommon.Camera.Info.SensorName;
                 }
             }
         }
@@ -1278,15 +1239,15 @@ namespace ASCOM.SonyMirrorless
                 {
                     SensorType type;
 
-                    if (Personality == SonyCommon.PERSONALITY_NINA)
-                    {
-                        type = camera.PreviewMode ? SensorType.Monochrome : SensorType.RGGB;
-                    }
-                    else
-                    {
-                        type = camera.OutputMode == SonyCamera.ImageMode.RGB ? SensorType.Color : SensorType.RGGB;
-                    }
-                    tl.LogMessage("SensorType Get", type.ToString());
+//                    if (DriverCommon.Settings.Personality == SonyCommon.PERSONALITY_NINA)
+//                    {
+//                        type = DriverCommon.Camera.PreviewMode ? SensorType.Monochrome : SensorType.RGGB;
+//                    }
+//                    else
+//                    {
+                        type = DriverCommon.Camera.OutputMode == SonyCamera.ImageMode.RGB ? SensorType.Color : SensorType.RGGB;
+//                    }
+                    DriverCommon.LogCameraMessage("SensorType Get", type.ToString());
 
                     return type;
                 }
@@ -1299,7 +1260,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_SetCCDTemperature"))
                 {
-                    tl.LogMessage("SetCCDTemperature Get", "Not implemented");
+//                    DriverCommon.LogCameraMessage("SetCCDTemperature Get", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", false);
                 }
@@ -1308,7 +1269,7 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "set_SetCCDTemperature"))
                 {
-                    tl.LogMessage("SetCCDTemperature Set", "Not implemented");
+//                    DriverCommon.LogCameraMessage("SetCCDTemperature Set", "Not implemented");
 
                     throw new ASCOM.PropertyNotImplementedException("SetCCDTemperature", true);
                 }
@@ -1319,26 +1280,40 @@ namespace ASCOM.SonyMirrorless
         {
             using (new SerializedAccess(this, "StartExposure()", true))
             {
-                if (Duration < 0.0) throw new InvalidValueException("StartExposure", Duration.ToString(), "0.0 upwards");
-                if (StartX + NumX > camera.Mode.ImageWidthPixels) throw new InvalidValueException("StartExposure", cameraNumX.ToString(), camera.Info.ImageWidthPixels.ToString());
-                if (StartY + NumY > camera.Mode.ImageHeightPixels) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), camera.Info.ImageHeightPixels.ToString());
+                if (Duration < 0.0)
+                {
+                    DriverCommon.LogCameraMessage("StartExposure", $"Exposure time must be >= 0 seconds (was passed {Duration})");
+                    throw new InvalidValueException("StartExposure", "Duration", ">= 0");
+                }
+
+                if (StartX + NumX > DriverCommon.Camera.Mode.ImageWidthPixels)
+                {
+                    DriverCommon.LogCameraMessage("StartExposure", $"StartX ({StartX}( + NumX ({NumX}) > ImageWidth ({DriverCommon.Camera.Info.ImageWidthPixels})");
+                    throw new InvalidValueException("StartExposure", "StartX+NumX", $"<={DriverCommon.Camera.Info.ImageWidthPixels}");
+                }
+
+                if (StartY + NumY > DriverCommon.Camera.Mode.ImageHeightPixels)
+                {
+                    DriverCommon.LogCameraMessage("StartExposure", $"StartY ({StartY}( + NumY ({NumY}) > ImageHeight ({DriverCommon.Camera.Info.ImageHeightPixels})");
+                    throw new InvalidValueException("StartExposure", "StartX+NumX", $"<={DriverCommon.Camera.Info.ImageHeightPixels}");
+                }
 
                 if (!LastSetFastReadout)
                 {
-                    if (Duration <= 1.0e-5 && camera.HasLiveView && AutoLiveview)
+                    if (Duration <= 1.0e-5 && DriverCommon.Camera.HasLiveView && DriverCommon.Settings.AutoLiveview)
                     {
-                        camera.PreviewMode = true;
-                        tl.LogMessage("StartExposure", "Asked for 0.0s exposure, AutoLiveview enabled and camera supports it - taking image as liveview");
+                        DriverCommon.Camera.PreviewMode = true;
+                        DriverCommon.LogCameraMessage("StartExposure", "Asked for 0.0s exposure, AutoLiveview enabled and camera supports it - taking image as liveview");
                     }
                     else
                     {
-                        camera.PreviewMode = false;
+                        DriverCommon.Camera.PreviewMode = false;
                     }
                 }
 
-                tl.LogMessage("StartExposure", String.Format("Duration={0}, Light={1}", Duration.ToString(), Light.ToString()));
+                DriverCommon.LogCameraMessage("StartExposure", String.Format("Duration={0}, Light={1}", Duration.ToString(), Light.ToString()));
 
-                camera.StartCapture(Duration, Personality, defaultReadoutMode);
+                DriverCommon.Camera.StartCapture(Duration, DriverCommon.Settings.Personality, DriverCommon.Settings.DefaultReadoutMode);
             }
         }
 
@@ -1348,18 +1323,32 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_StartX"))
                 {
-                    tl.LogMessage("StartX Get", cameraStartX.ToString());
+                    DriverCommon.LogCameraMessage("StartX Get", RequestedStartX.ToString());
 
-                    return cameraStartX;
+                    return RequestedStartX;
+//                    DriverCommon.LogCameraMessage("StartX Get", DriverCommon.Settings.ImageXOffset.ToString());
+
+//                    return DriverCommon.Settings.ImageXOffset;
                 }
             }
             set
             {
                 using (new SerializedAccess(this, "set_StartX"))
                 {
-                    cameraStartX = value;
+                    int width = DriverCommon.Settings.ImageWidth;
 
-                    tl.LogMessage("StartX Set", value.ToString());
+                    if (value < 0 || (value + NumX) > width)
+                    {
+                        int numX = NumX;
+
+                        DriverCommon.LogCameraMessage("StartX", $"Attempt to set value {value} where numX ({numX}) + this would be greater than width ({width})");
+                        throw new ASCOM.InvalidValueException("Out of range");
+                    }
+
+                    //                    DriverCommon.Settings.ImageXOffset = value;
+                    RequestedStartX = value;
+
+                    DriverCommon.LogCameraMessage("StartX Set", value.ToString());
                 }
             }
         }
@@ -1370,18 +1359,32 @@ namespace ASCOM.SonyMirrorless
             {
                 using (new SerializedAccess(this, "get_StartY"))
                 {
-                    tl.LogMessage("StartY Get", cameraStartY.ToString());
+                    DriverCommon.LogCameraMessage("StartY Get", RequestedStartY.ToString());
 
-                    return cameraStartY;
+                    return RequestedStartY;
+//                    DriverCommon.LogCameraMessage("StartY Get", DriverCommon.Settings.ImageYOffset.ToString());
+
+//                    return DriverCommon.Settings.ImageYOffset;
                 }
             }
             set
             {
                 using (new SerializedAccess(this, "set_StartY"))
                 {
-                    cameraStartY = value;
+                    int height = DriverCommon.Settings.ImageHeight;
 
-                    tl.LogMessage("StartY set", value.ToString());
+                    if (value < 0 || (value + NumY) > height)
+                    {
+                        int numY = NumY;
+
+                        DriverCommon.LogCameraMessage("StartY", $"Attempt to set value {value} where numY ({numY}) + this would be greater than height ({height})");
+                        throw new ASCOM.InvalidValueException("Out of range");
+                    }
+
+                    RequestedStartY = value;
+//                    DriverCommon.Settings.ImageYOffset = value;
+
+                    DriverCommon.LogCameraMessage("StartY set", value.ToString());
                 }
             }
         }
@@ -1390,8 +1393,8 @@ namespace ASCOM.SonyMirrorless
         {
             using (new SerializedAccess(this, "StopExposure()", true))
             {
-                tl.LogMessage("StopExposure", "Attempting to stop exposure");
-                camera.StopCapture();
+                DriverCommon.LogCameraMessage("StopExposure", "Attempting to stop exposure");
+                DriverCommon.Camera.StopCapture();
             }
         }
 
@@ -1418,11 +1421,11 @@ namespace ASCOM.SonyMirrorless
                 P.DeviceType = "Camera";
                 if (bRegister)
                 {
-                    P.Register(driverID, driverDescription);
+                    P.Register(DriverCommon.CameraDriverId, DriverCommon.CameraDriverDescription);
                 }
                 else
                 {
-                    P.Unregister(driverID);
+                    P.Unregister(DriverCommon.CameraDriverId);
                 }
             }
         }
@@ -1482,8 +1485,7 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                // TODO check that the driver hardware connection exists and is connected to the hardware
-                return camera != null && camera.Connected;
+                return DriverCommon.CameraConnected;
             }
         }
 
@@ -1495,98 +1497,16 @@ namespace ASCOM.SonyMirrorless
         {
             if (!IsConnected)
             {
-                LogMessage("CheckConnected", message);
+                DriverCommon.LogCameraMessage("CheckConnected", message);
                 throw new ASCOM.NotConnectedException(message);
             }
         }
 
-        /// <summary>
-        /// Read the device configuration from the ASCOM Profile store
-        /// </summary>
-        internal void ReadProfile()
-        {
-            using (Profile driverProfile = new Profile())
-            {
-                driverProfile.DeviceType = "Camera";
-                tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
-                deviceId = driverProfile.GetValue(driverID, cameraProfileName, string.Empty, cameraDefault);
-                defaultReadoutMode = Convert.ToInt16(driverProfile.GetValue(driverID, readoutModeDefaultProfileName, string.Empty, readoutModeDefault));
-                UseLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, useLiveviewProfileName, string.Empty, useLiveviewDefault));
-                Personality = Convert.ToInt16(driverProfile.GetValue(driverID, personalityProfileName, string.Empty, personalityDefault));
-                AutoLiveview = Convert.ToBoolean(driverProfile.GetValue(driverID, autoLiveviewProfileName, string.Empty, autoLiveviewDefault));
-                BulbModeEnable = Convert.ToBoolean(driverProfile.GetValue(driverID, bulbModeEnableProfileName, string.Empty, bulbModeEnableDefault));
-                BulbModeTime = Convert.ToInt16(driverProfile.GetValue(driverID, bulbModeTimeProfileName, string.Empty, bulbModeTimeDefault));
-                AllowISOAdjust = Convert.ToBoolean(driverProfile.GetValue(driverID, allowISOAdjustProfileName, string.Empty, allowISOAdjustDefault));
-
-                if (defaultReadoutMode == 0)
-                {
-                    defaultReadoutMode = SonyCommon.OUTPUTFORMAT_RGGB;
-                }
-
-                // This needs to actually save to registry
-                SaveRawImageData = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", 0));
-                SaveRawImageFolder = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", "");
-                SaveRawImageFolderWithDate = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", 0));
-                SaveRawImageCreateMultipleDirectories = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Create Multiple Directories", 0));
-
-                LogMessage("ReadProfile", "DeviceID:                      {0}", deviceId);
-                LogMessage("ReadProfile", "Default Readout Mode:          {0}", defaultReadoutMode.ToString());
-                LogMessage("ReadProfile", "Save Raw files:                {0}", SaveRawImageData.ToString());
-                LogMessage("ReadProfile", "Save Raw files Path:           {0}", SaveRawImageFolder);
-                LogMessage("ReadProfile", "Save Raw files Path Add Date:  {0}", SaveRawImageFolderWithDate.ToString());
-                LogMessage("ReadProfile", "Use Liveview:                  {0}", UseLiveview.ToString());
-                LogMessage("ReadProfile", "AutoLiveview @ 0.0s:           {0}", AutoLiveview.ToString());
-                LogMessage("ReadProfile", "Personality:                   {0}", Personality.ToString());
-                LogMessage("ReadProfile", "Bulb Mode Enable:              {0}", BulbModeEnable.ToString());
-                LogMessage("ReadProfile", "Bulb Mode Time:                {0}", BulbModeTime.ToString());
-            }
-        }
-
-        /// <summary>
-        /// Write the device configuration to the  ASCOM  Profile store
-        /// </summary>
-        internal void WriteProfile()
-        {
-            using (Profile driverProfile = new Profile())
-            {
-                driverProfile.DeviceType = "Camera";
-                driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
-                driverProfile.WriteValue(driverID, readoutModeDefaultProfileName, defaultReadoutMode.ToString());
-                driverProfile.WriteValue(driverID, useLiveviewProfileName, UseLiveview.ToString());
-                driverProfile.WriteValue(driverID, autoLiveviewProfileName, AutoLiveview.ToString());
-                driverProfile.WriteValue(driverID, personalityProfileName, Personality.ToString());
-                driverProfile.WriteValue(driverID, bulbModeEnableProfileName, BulbModeEnable.ToString());
-                driverProfile.WriteValue(driverID, bulbModeTimeProfileName, BulbModeTime.ToString());
-                driverProfile.WriteValue(driverID, allowISOAdjustProfileName, AllowISOAdjust.ToString());
-
-                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Auto Save", SaveRawImageData ? 1 : 0);
-                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", SaveRawImageFolder);
-                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", SaveRawImageFolderWithDate ? 1 : 0);
-                Registry.SetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Create Multiple Directories", SaveRawImageCreateMultipleDirectories ? 1 : 0);
-
-                if (deviceId != null)
-                {
-                    driverProfile.WriteValue(driverID, cameraProfileName, deviceId.ToString());
-                }
-            }
-        }
-
-        /// <summary>
-        /// Log helper function that takes formatted strings and arguments
-        /// </summary>
-        /// <param name="identifier"></param>
-        /// <param name="message"></param>
-        /// <param name="args"></param>
-        internal static void LogMessage(string identifier, string message, params object[] args)
-        {
-            var msg = string.Format(message, args);
-            tl.LogMessage(identifier, msg);
-        }
         #endregion
 
         internal static object Resize(object array, int rank, int startX, int startY, int width, int height)
         {
-            LogMessage("Resize", "rank={0}, startX={1}, startY={2}, width={3}, height={4}", rank, startX, startY, width, height);
+            DriverCommon.LogCameraMessage("Resize", "rank={0}, startX={1}, startY={2}, width={3}, height={4}", rank, startX, startY, width, height);
 
             if (rank == 2)
             {
@@ -1652,7 +1572,7 @@ namespace ASCOM.SonyMirrorless
             {
                 m_cam = cam;
                 m_method = method;
-                LogMessage(m_method, "[enter] {0}", m_serialAccess.ToString());
+//               DriverCommon.LogCameraMessage(m_method, "[enter] {0}", m_serialAccess.ToString());
 
                 if (checkConnected)
                 {
@@ -1661,16 +1581,16 @@ namespace ASCOM.SonyMirrorless
 
                 if (!m_serialAccess.WaitOne(1000))
                 {
-                    LogMessage(m_method, "Waiting to enter {0}", m_serialAccess.ToString());
+                    DriverCommon.LogCameraMessage(m_method, "Waiting to enter {0}", m_serialAccess.ToString());
                     m_serialAccess.WaitOne();
                 }
 
-                LogMessage(m_method, "[in] {0}", m_serialAccess.ToString());
+//               DriverCommon.LogCameraMessage(m_method, "[in] {0}", m_serialAccess.ToString());
             }
 
             public void Dispose()
             {
-                LogMessage(m_method, "[out] {0}", m_serialAccess.ToString());
+//               DriverCommon.LogCameraMessage(m_method, "[out] {0}", m_serialAccess.ToString());
                 m_serialAccess.ReleaseMutex();
             }
         }
