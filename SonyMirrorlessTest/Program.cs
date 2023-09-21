@@ -69,6 +69,8 @@ namespace ASCOM.SonyMirrorless
                 Console.WriteLine("Got an image #" + count.ToString());
                 GC.Collect();
             }
+
+            Console.WriteLine(device.CCDTemperature);
 //            */
             device.Connected = false;
             Console.WriteLine("Press Enter to finish");

@@ -180,7 +180,15 @@ namespace ASCOM.SonyMirrorless
 
                 if (value)
                 {
-                    DriverCommon.FocuserConnected = true;
+                    if (DriverCommon.Settings.UsingCameraLens && DriverCommon.Settings.LensId != "")
+                    {
+                        DriverCommon.FocuserConnected = true;
+                        DriverCommon.Camera.SetLens(DriverCommon.Settings.LensId);
+                    }
+                    else
+                    {
+                        throw new DriverException("Settings page must be configured to use Camera Lens and specify which lens to use");
+                    }
                 }
                 else
                 {
@@ -241,7 +249,7 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 DriverCommon.LogFocuserMessage("Absolute Get", true.ToString());
-                return false;
+                return true;
             }
         }
 
@@ -279,7 +287,7 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 DriverCommon.LogFocuserMessage("MaxIncrement Get", focuserSteps.ToString());
-                return focuserSteps; // Maximum change in one move
+                return DriverCommon.Camera.GetFocusLimit(); // Maximum change in one move
             }
         }
 
@@ -288,7 +296,7 @@ namespace ASCOM.SonyMirrorless
             get
             {
                 DriverCommon.LogFocuserMessage("MaxStep Get", focuserSteps.ToString());
-                return focuserSteps; // Maximum extent of the focuser, so position range is 0 to 10,000
+                return DriverCommon.Camera.GetFocusLimit(); // Maximum extent of the focuser, so position range is 0 to 10,000
             }
         }
 
@@ -296,14 +304,15 @@ namespace ASCOM.SonyMirrorless
         {
             DriverCommon.LogFocuserMessage("Move", Position.ToString());
 
-            DriverCommon.Camera.MoveFocus(Position);
+            DriverCommon.Camera.SetFocus(Position);
         }
 
         public int Position
         {
             get
             {
-                throw new ASCOM.PropertyNotImplementedException("StepSize", false);
+                return DriverCommon.Camera.GetFocus();
+//                throw new ASCOM.PropertyNotImplementedException("StepSize", false);
 //                return focuserPosition; // Return the focuser position
             }
         }

@@ -99,7 +99,9 @@
     <Compile Include="SetupDialogForm.designer.cs">
       <DependentUpon>SetupDialogForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Lens.cs" />
     <Compile Include="SonyCamera.cs" />
+    <Compile Include="LensEnumerator.cs" />
     <Compile Include="SonyCameraEnumerator.cs" />
     <Compile Include="SonyCommon.cs" />
     <Compile Include="SonyImage.cs" />

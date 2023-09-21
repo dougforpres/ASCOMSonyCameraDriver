@@ -34,6 +34,8 @@ namespace ASCOM.SonyMirrorless
         public const UInt16 PROPERTY_ISO = 0xd21e;
         public const UInt16 PROPERTY_ISO_OPTIONS = 0xfffe;
         public const UInt16 PROPERTY_FOCUS_CONTROL = 0xd2d1;
+        public const UInt16 PROPERTY_BATTERY_TEMPERATURE = 0xfffd;
+        public const UInt16 PROPERTY_FOCUS_POSITION = 0xfffc;
 
         protected const UInt32 CAMERA_SUPPORTS_LIVEVIEW = 0x00000001;
 
@@ -128,6 +130,15 @@ namespace ASCOM.SonyMirrorless
             public UInt32 ValueCount;
         }
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct LensInfo
+        {
+            public string Id;
+            public string Manufacturer;
+            public string Model;
+            public string LensPath;
+        }
+
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 GetDeviceCount();
 
@@ -181,5 +192,23 @@ namespace ASCOM.SonyMirrorless
 
         [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         protected static extern UInt32 SetPropertyValue(UInt32 hCamera, UInt32 propertyId, UInt32 value);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 SetFocusPosition(UInt32 hCamera, ref UInt32 position);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 GetFocusPosition(UInt32 hCamera);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 GetFocusLimit(UInt32 hCamera);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 GetLensCount();
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 GetLensInfo(UInt32 offset, ref LensInfo value);
+
+        [DllImport("SonyMTPCamera.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        protected static extern UInt32 SetAttachedLens(UInt32 hCamera, string lensId);
     }
 }

@@ -27,6 +27,8 @@ namespace ASCOM.SonyMirrorless
         public string ARWAutosaveFolder = "";
         public bool ARWAutosaveWithDate = false;
         public bool ARWAutosaveAlwaysCreateEmptyFolder = false;
+        public bool UsingCameraLens = false;
+        public string LensId = "";
 
         // Dynamic values
         public int ImageWidth = DefaultImageWidth; // Initialise variables to hold values required for functionality tested by Conform
@@ -84,7 +86,10 @@ namespace ASCOM.SonyMirrorless
         internal static string allowISOAdjustDefault = "false";
 
         // Specific to Focuser
-        // ...
+        internal static string lensIdProfileName = "Lens ID";
+        internal static string lensIdProfileDefault = "";
+        internal static string usingCameraLensProfileName = "Using Camera Lens";
+        internal static string usingCameraLensProfileDefault = "false";
 
         static public SonyCamera Camera
         {
@@ -186,26 +191,29 @@ namespace ASCOM.SonyMirrorless
                 Settings.ARWAutosaveFolder = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path", "");
                 Settings.ARWAutosaveWithDate = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Add Date", 0));
                 Settings.ARWAutosaveAlwaysCreateEmptyFolder = Convert.ToBoolean(Registry.GetValue("HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll", "File Save Path Create Multiple Directories", 0));
-
-                Logger.Enabled = Settings.EnableLogging;
-
-                Log($"DeviceID:                            {Settings.DeviceId}", "ReadProfile");
-                Log($"Default Readout Mode:                {Settings.DefaultReadoutMode}", "ReadProfile");
-                Log($"Save Raw files:                      {Settings.ARWAutosave}", "ReadProfile");
-                Log($"Save Raw files Path:                 {Settings.ARWAutosaveFolder}", "ReadProfile");
-                Log($"Save Raw files Path Add Date:        {Settings.ARWAutosaveWithDate}", "ReadProfile");
-                Log($"Save Raw files Always Create Folder: {Settings.ARWAutosaveWithDate}", "ReadProfile");
-                Log($"Use Liveview:                        {Settings.UseLiveview}", "ReadProfile");
-                Log($"AutoLiveview @ 0.0s:                 {Settings.AutoLiveview}", "ReadProfile");
-                Log($"Personality:                         {Settings.Personality}", "ReadProfile");
-                Log($"Bulb Mode Enable:                    {Settings.BulbModeEnable}", "ReadProfile");
-                Log($"Bulb Mode Time:                      {Settings.BulbModeTime}", "ReadProfile");
             }
 
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Focuser";
+
+                Settings.UsingCameraLens = Convert.ToBoolean(driverProfile.GetValue(FocuserDriverId, usingCameraLensProfileName, string.Empty, usingCameraLensProfileDefault));
+                Settings.LensId = driverProfile.GetValue(FocuserDriverId, lensIdProfileName, string.Empty, lensIdProfileDefault);
             }
+
+            Logger.Enabled = Settings.EnableLogging;
+
+            Log($"DeviceID:                            {Settings.DeviceId}", "ReadProfile");
+            Log($"Default Readout Mode:                {Settings.DefaultReadoutMode}", "ReadProfile");
+            Log($"Save Raw files:                      {Settings.ARWAutosave}", "ReadProfile");
+            Log($"Save Raw files Path:                 {Settings.ARWAutosaveFolder}", "ReadProfile");
+            Log($"Save Raw files Path Add Date:        {Settings.ARWAutosaveWithDate}", "ReadProfile");
+            Log($"Save Raw files Always Create Folder: {Settings.ARWAutosaveWithDate}", "ReadProfile");
+            Log($"Use Liveview:                        {Settings.UseLiveview}", "ReadProfile");
+            Log($"AutoLiveview @ 0.0s:                 {Settings.AutoLiveview}", "ReadProfile");
+            Log($"Personality:                         {Settings.Personality}", "ReadProfile");
+            Log($"Bulb Mode Enable:                    {Settings.BulbModeEnable}", "ReadProfile");
+            Log($"Bulb Mode Time:                      {Settings.BulbModeTime}", "ReadProfile");
 
             return true;
         }
@@ -240,7 +248,8 @@ namespace ASCOM.SonyMirrorless
             using (Profile driverProfile = new Profile())
             {
                 driverProfile.DeviceType = "Focuser";
-//                driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
+                driverProfile.WriteValue(FocuserDriverId, lensIdProfileName, Settings.LensId);
+                driverProfile.WriteValue(FocuserDriverId, usingCameraLensProfileName, Settings.UsingCameraLens.ToString());
             }
 
 
@@ -303,6 +312,11 @@ namespace ASCOM.SonyMirrorless
 
                     Log("Connecting", "EnsureCameraConnection");
                     camera.Connected = needsConnect;
+                }
+
+                if (camera == null || !camera.Connected)
+                {
+                    throw new Exception("Cannot connect camera");
                 }
             }
             else

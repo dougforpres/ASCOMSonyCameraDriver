@@ -16,7 +16,6 @@ namespace ASCOM.SonyMirrorless
     public partial class SetupDialogForm : Form
     {
         internal bool InInit = false;
-//        internal Camera ascomCamera;
 
         public SetupDialogForm()
         {
@@ -43,6 +42,8 @@ namespace ASCOM.SonyMirrorless
             DriverCommon.Settings.BulbModeEnable = checkBoxBulbMode.Checked;
             DriverCommon.Settings.BulbModeTime = short.Parse(textBoxBulbMode.Text.Trim());
             DriverCommon.Settings.AllowISOAdjust = checkBoxAllowISOAdjust.Checked;
+            DriverCommon.Settings.UsingCameraLens = checkBoxUsingCameraLens.Checked;
+            DriverCommon.Settings.LensId = comboBoxLenses.SelectedItem != null ? ((Lens)comboBoxLenses.SelectedItem).Id : "";
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -78,7 +79,7 @@ namespace ASCOM.SonyMirrorless
 
             foreach (SonyCamera candidate in enumerator.Cameras)
             {
-                comboBoxCamera.Items.Add(candidate.DisplayName);
+                int id = comboBoxCamera.Items.Add(candidate.DisplayName);
 
                 if (candidate.DisplayName == DriverCommon.Settings.DeviceId)
                 {
@@ -89,6 +90,20 @@ namespace ASCOM.SonyMirrorless
             if (selected.Length > 0)
             {
                 comboBoxCamera.SelectedItem = selected;
+            }
+
+            checkBoxUsingCameraLens.Checked = DriverCommon.Settings.UsingCameraLens;
+            comboBoxLenses.Enabled = DriverCommon.Settings.UsingCameraLens;
+            LensEnumerator lensEnumerator = new LensEnumerator();
+
+            foreach (Lens lens in lensEnumerator.Lenses)
+            {
+                int id = comboBoxLenses.Items.Add(lens);
+
+                if (lens.Id == DriverCommon.Settings.LensId)
+                {
+                    comboBoxLenses.SelectedIndex = id;
+                }
             }
 
             checkBoxEnableSaveLocation.Checked = DriverCommon.Settings.ARWAutosave;
@@ -344,6 +359,11 @@ namespace ASCOM.SonyMirrorless
             {
                 MessageBox.Show("Unable to open link that was clicked.");
             }
+        }
+
+        private void checkBoxUsingCameraLens_CheckedChanged(object sender, EventArgs e)
+        {
+            comboBoxLenses.Enabled = checkBoxUsingCameraLens.Checked;
         }
 
         /*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)

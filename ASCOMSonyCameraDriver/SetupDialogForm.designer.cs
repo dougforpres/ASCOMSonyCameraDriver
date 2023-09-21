@@ -57,6 +57,9 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxAutoLiveview = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.selectCameraTab = new System.Windows.Forms.TabPage();
+            this.label11 = new System.Windows.Forms.Label();
+            this.comboBoxLenses = new System.Windows.Forms.ComboBox();
+            this.checkBoxUsingCameraLens = new System.Windows.Forms.CheckBox();
             this.textBoxVersion = new System.Windows.Forms.TextBox();
             this.linkWiki = new System.Windows.Forms.LinkLabel();
             this.cameraPersonalityTab = new System.Windows.Forms.TabPage();
@@ -67,13 +70,13 @@ namespace ASCOM.SonyMirrorless
             this.label10 = new System.Windows.Forms.Label();
             this.checkBoxBulbMode = new System.Windows.Forms.CheckBox();
             this.extrasTab = new System.Windows.Forms.TabPage();
+            this.checkBoxCreateMultipleDirectories = new System.Windows.Forms.CheckBox();
             this.checkBoxAppendDate = new System.Windows.Forms.CheckBox();
             this.buttonSelectFolder = new System.Windows.Forms.Button();
             this.textBoxSaveLocation = new System.Windows.Forms.TextBox();
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.modeWarning = new System.Windows.Forms.PictureBox();
-            this.checkBoxCreateMultipleDirectories = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -347,6 +350,9 @@ namespace ASCOM.SonyMirrorless
             // 
             // selectCameraTab
             // 
+            this.selectCameraTab.Controls.Add(this.label11);
+            this.selectCameraTab.Controls.Add(this.comboBoxLenses);
+            this.selectCameraTab.Controls.Add(this.checkBoxUsingCameraLens);
             this.selectCameraTab.Controls.Add(this.textBoxVersion);
             this.selectCameraTab.Controls.Add(this.linkWiki);
             this.selectCameraTab.Controls.Add(this.comboBoxCamera);
@@ -359,6 +365,35 @@ namespace ASCOM.SonyMirrorless
             this.selectCameraTab.TabIndex = 0;
             this.selectCameraTab.Text = "Select Camera";
             this.selectCameraTab.UseVisualStyleBackColor = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(21, 252);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(59, 25);
+            this.label11.TabIndex = 10;
+            this.label11.Text = "Lens";
+            // 
+            // comboBoxLenses
+            // 
+            this.comboBoxLenses.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxLenses.FormattingEnabled = true;
+            this.comboBoxLenses.Location = new System.Drawing.Point(146, 252);
+            this.comboBoxLenses.Name = "comboBoxLenses";
+            this.comboBoxLenses.Size = new System.Drawing.Size(418, 33);
+            this.comboBoxLenses.TabIndex = 9;
+            // 
+            // checkBoxUsingCameraLens
+            // 
+            this.checkBoxUsingCameraLens.AutoSize = true;
+            this.checkBoxUsingCameraLens.Location = new System.Drawing.Point(26, 204);
+            this.checkBoxUsingCameraLens.Name = "checkBoxUsingCameraLens";
+            this.checkBoxUsingCameraLens.Size = new System.Drawing.Size(428, 29);
+            this.checkBoxUsingCameraLens.TabIndex = 8;
+            this.checkBoxUsingCameraLens.Text = "I\'m using a camera lens, not a telescope";
+            this.checkBoxUsingCameraLens.UseVisualStyleBackColor = true;
+            this.checkBoxUsingCameraLens.CheckedChanged += new System.EventHandler(this.checkBoxUsingCameraLens_CheckedChanged);
             // 
             // textBoxVersion
             // 
@@ -477,6 +512,16 @@ namespace ASCOM.SonyMirrorless
             this.extrasTab.Text = "Extras";
             this.extrasTab.UseVisualStyleBackColor = true;
             // 
+            // checkBoxCreateMultipleDirectories
+            // 
+            this.checkBoxCreateMultipleDirectories.AutoSize = true;
+            this.checkBoxCreateMultipleDirectories.Location = new System.Drawing.Point(54, 108);
+            this.checkBoxCreateMultipleDirectories.Name = "checkBoxCreateMultipleDirectories";
+            this.checkBoxCreateMultipleDirectories.Size = new System.Drawing.Size(604, 29);
+            this.checkBoxCreateMultipleDirectories.TabIndex = 16;
+            this.checkBoxCreateMultipleDirectories.Text = "If directory already exists, create a new one with (1), (2), ...";
+            this.checkBoxCreateMultipleDirectories.UseVisualStyleBackColor = true;
+            // 
             // checkBoxAppendDate
             // 
             this.checkBoxAppendDate.AutoSize = true;
@@ -536,16 +581,6 @@ namespace ASCOM.SonyMirrorless
             this.modeWarning.TabIndex = 12;
             this.modeWarning.TabStop = false;
             this.modeWarning.Visible = false;
-            // 
-            // checkBoxCreateMultipleDirectories
-            // 
-            this.checkBoxCreateMultipleDirectories.AutoSize = true;
-            this.checkBoxCreateMultipleDirectories.Location = new System.Drawing.Point(54, 108);
-            this.checkBoxCreateMultipleDirectories.Name = "checkBoxCreateMultipleDirectories";
-            this.checkBoxCreateMultipleDirectories.Size = new System.Drawing.Size(604, 29);
-            this.checkBoxCreateMultipleDirectories.TabIndex = 16;
-            this.checkBoxCreateMultipleDirectories.Text = "If directory already exists, create a new one with (1), (2), ...";
-            this.checkBoxCreateMultipleDirectories.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
@@ -628,5 +663,8 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.TextBox textBoxVersion;
         private System.Windows.Forms.CheckBox checkBoxAppendDate;
         private System.Windows.Forms.CheckBox checkBoxCreateMultipleDirectories;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.ComboBox comboBoxLenses;
+        private System.Windows.Forms.CheckBox checkBoxUsingCameraLens;
     }
 }

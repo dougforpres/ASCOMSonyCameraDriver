@@ -347,11 +347,15 @@ namespace ASCOM.SonyMirrorless
         {
             get
             {
-                using (new SerializedAccess(this, "get_CCDTemperature"))
+                using (new SerializedAccess(this, "get_CCDTemperature", true))
                 {
-//                    DriverCommon.LogCameraMessage("CCDTemperature Get Get", "Not implemented");
+                    SonyCommon.PropertyValue v = DriverCommon.Camera.GetPropertyValue(SonyCommon.PROPERTY_BATTERY_TEMPERATURE);
 
-                    throw new ASCOM.PropertyNotImplementedException("CCDTemperature", false);
+                    double temperature = ((int)v.Value) / 10.0;
+                    DriverCommon.LogCameraMessage("CCDTemperature Get", $"raw: {v.Value}, calc: {temperature}");
+
+                    //                    throw new ASCOM.PropertyNotImplementedException("CCDTemperature", false);
+                    return temperature;
                 }
             }
         }

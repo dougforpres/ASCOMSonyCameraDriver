@@ -145,30 +145,26 @@ namespace ASCOM.SonyMirrorless
             }
         }
 
-        public void MoveFocus(int direction)
+        public void SetLens(string lensId)
         {
-            uint focusValue = 0;
+            SetAttachedLens(m_handle, lensId);
+        }
 
-            switch (direction)
-            {
-                case 1:
-                    focusValue = 1;
-                    break;
+        public int GetFocusLimit()
+        {
+            return (int)GetFocusLimit(m_handle);
+        }
 
-                case 2:
-                    focusValue = 3;
-                    break;
+        public int GetFocus()
+        {
+            return (int)GetFocusPosition(m_handle);
+        }
 
-                case -1:
-                    focusValue = 0xffff;
-                    break;
+        public void SetFocus(int position)
+        {
+            UInt32 focusPos = (UInt32)position;
 
-                case -2:
-                    focusValue = 0xfffd;
-                    break;
-            }
-
-            SetPropertyValue(m_handle, SonyCommon.PROPERTY_FOCUS_CONTROL, focusValue);
+            SetFocusPosition(m_handle, ref focusPos);
         }
 
         public SonyImage StartCapture(double duration, int personality, short readoutMode)
