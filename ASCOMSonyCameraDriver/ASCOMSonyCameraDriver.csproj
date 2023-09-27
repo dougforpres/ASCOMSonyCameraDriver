@@ -82,6 +82,24 @@
     <Compile Include="CameraDriver.cs" />
     <Compile Include="DriverCommon.cs" />
     <Compile Include="FocuserDriver.cs" />
+    <Compile Include="FocusPosition.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FocusPosition.Designer.cs">
+      <DependentUpon>FocusPosition.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FocusTools.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FocusTools.Designer.cs">
+      <DependentUpon>FocusTools.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoggingSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoggingSetup.Designer.cs">
+      <DependentUpon>LoggingSetup.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -107,6 +125,15 @@
     <Compile Include="SonyImage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FocusPosition.resx">
+      <DependentUpon>FocusPosition.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FocusTools.resx">
+      <DependentUpon>FocusTools.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoggingSetup.resx">
+      <DependentUpon>LoggingSetup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -128,7 +155,11 @@
     </None>
     <Content Include="ASCOM.ico" />
     <Content Include="Installer\Sony Mirrorless Driver Setup.iss" />
+    <None Include="Landscape.png" />
     <Content Include="License Info.txt" />
+    <None Include="Macro.png" />
+    <Content Include="Resources\Landscape.png" />
+    <Content Include="Resources\Macro.png" />
     <Content Include="Resources\Warning.png" />
     <Content Include="Sony Mirrorless Camera Readme.htm" />
     <None Include="Resources\ASCOM.bmp" />

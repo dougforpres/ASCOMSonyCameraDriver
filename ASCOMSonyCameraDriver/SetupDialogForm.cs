@@ -106,6 +106,8 @@ namespace ASCOM.SonyMirrorless
                 }
             }
 
+            buttonFocusTools.Enabled = DriverCommon.Settings.UsingCameraLens;
+
             checkBoxEnableSaveLocation.Checked = DriverCommon.Settings.ARWAutosave;
             textBoxSaveLocation.Enabled = DriverCommon.Settings.ARWAutosave;
             textBoxSaveLocation.Text = DriverCommon.Settings.ARWAutosaveFolder;
@@ -364,6 +366,17 @@ namespace ASCOM.SonyMirrorless
         private void checkBoxUsingCameraLens_CheckedChanged(object sender, EventArgs e)
         {
             comboBoxLenses.Enabled = checkBoxUsingCameraLens.Checked;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (FocusTools F = new FocusTools())
+            {
+                var result = F.ShowDialog();
+//                if (result == System.Windows.Forms.DialogResult.OK)
+//                {
+//                }
+            }
         }
 
         /*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)

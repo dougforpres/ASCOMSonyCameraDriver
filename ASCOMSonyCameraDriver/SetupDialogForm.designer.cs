@@ -77,6 +77,7 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.modeWarning = new System.Windows.Forms.PictureBox();
+            this.buttonFocusTools = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -166,7 +167,7 @@ namespace ASCOM.SonyMirrorless
             this.comboBoxCamera.Location = new System.Drawing.Point(146, 134);
             this.comboBoxCamera.Margin = new System.Windows.Forms.Padding(6);
             this.comboBoxCamera.Name = "comboBoxCamera";
-            this.comboBoxCamera.Size = new System.Drawing.Size(418, 33);
+            this.comboBoxCamera.Size = new System.Drawing.Size(566, 33);
             this.comboBoxCamera.TabIndex = 1;
             // 
             // selectFolderDialog
@@ -350,6 +351,7 @@ namespace ASCOM.SonyMirrorless
             // 
             // selectCameraTab
             // 
+            this.selectCameraTab.Controls.Add(this.buttonFocusTools);
             this.selectCameraTab.Controls.Add(this.label11);
             this.selectCameraTab.Controls.Add(this.comboBoxLenses);
             this.selectCameraTab.Controls.Add(this.checkBoxUsingCameraLens);
@@ -381,7 +383,7 @@ namespace ASCOM.SonyMirrorless
             this.comboBoxLenses.FormattingEnabled = true;
             this.comboBoxLenses.Location = new System.Drawing.Point(146, 252);
             this.comboBoxLenses.Name = "comboBoxLenses";
-            this.comboBoxLenses.Size = new System.Drawing.Size(418, 33);
+            this.comboBoxLenses.Size = new System.Drawing.Size(566, 33);
             this.comboBoxLenses.TabIndex = 9;
             // 
             // checkBoxUsingCameraLens
@@ -582,6 +584,16 @@ namespace ASCOM.SonyMirrorless
             this.modeWarning.TabStop = false;
             this.modeWarning.Visible = false;
             // 
+            // buttonFocusTools
+            // 
+            this.buttonFocusTools.Location = new System.Drawing.Point(608, 193);
+            this.buttonFocusTools.Name = "buttonFocusTools";
+            this.buttonFocusTools.Size = new System.Drawing.Size(104, 48);
+            this.buttonFocusTools.TabIndex = 11;
+            this.buttonFocusTools.Text = "Tools";
+            this.buttonFocusTools.UseVisualStyleBackColor = true;
+            this.buttonFocusTools.Click += new System.EventHandler(this.button1_Click);
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -666,5 +678,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.ComboBox comboBoxLenses;
         private System.Windows.Forms.CheckBox checkBoxUsingCameraLens;
+        private System.Windows.Forms.Button buttonFocusTools;
     }
 }
