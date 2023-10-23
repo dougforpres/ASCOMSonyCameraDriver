@@ -57,6 +57,7 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxAutoLiveview = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.selectCameraTab = new System.Windows.Forms.TabPage();
+            this.buttonFocusTools = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.comboBoxLenses = new System.Windows.Forms.ComboBox();
             this.checkBoxUsingCameraLens = new System.Windows.Forms.CheckBox();
@@ -77,7 +78,7 @@ namespace ASCOM.SonyMirrorless
             this.checkBoxEnableSaveLocation = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.modeWarning = new System.Windows.Forms.PictureBox();
-            this.buttonFocusTools = new System.Windows.Forms.Button();
+            this.checkBoxHandsOffFocus = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picASCOM)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.selectCameraTab.SuspendLayout();
@@ -351,6 +352,7 @@ namespace ASCOM.SonyMirrorless
             // 
             // selectCameraTab
             // 
+            this.selectCameraTab.Controls.Add(this.checkBoxHandsOffFocus);
             this.selectCameraTab.Controls.Add(this.buttonFocusTools);
             this.selectCameraTab.Controls.Add(this.label11);
             this.selectCameraTab.Controls.Add(this.comboBoxLenses);
@@ -367,6 +369,16 @@ namespace ASCOM.SonyMirrorless
             this.selectCameraTab.TabIndex = 0;
             this.selectCameraTab.Text = "Select Camera";
             this.selectCameraTab.UseVisualStyleBackColor = true;
+            // 
+            // buttonFocusTools
+            // 
+            this.buttonFocusTools.Location = new System.Drawing.Point(608, 193);
+            this.buttonFocusTools.Name = "buttonFocusTools";
+            this.buttonFocusTools.Size = new System.Drawing.Size(104, 48);
+            this.buttonFocusTools.TabIndex = 11;
+            this.buttonFocusTools.Text = "Tools";
+            this.buttonFocusTools.UseVisualStyleBackColor = true;
+            this.buttonFocusTools.Click += new System.EventHandler(this.button1_Click);
             // 
             // label11
             // 
@@ -584,15 +596,15 @@ namespace ASCOM.SonyMirrorless
             this.modeWarning.TabStop = false;
             this.modeWarning.Visible = false;
             // 
-            // buttonFocusTools
+            // checkBoxHandsOffFocus
             // 
-            this.buttonFocusTools.Location = new System.Drawing.Point(608, 193);
-            this.buttonFocusTools.Name = "buttonFocusTools";
-            this.buttonFocusTools.Size = new System.Drawing.Size(104, 48);
-            this.buttonFocusTools.TabIndex = 11;
-            this.buttonFocusTools.Text = "Tools";
-            this.buttonFocusTools.UseVisualStyleBackColor = true;
-            this.buttonFocusTools.Click += new System.EventHandler(this.button1_Click);
+            this.checkBoxHandsOffFocus.AutoSize = true;
+            this.checkBoxHandsOffFocus.Location = new System.Drawing.Point(26, 291);
+            this.checkBoxHandsOffFocus.Name = "checkBoxHandsOffFocus";
+            this.checkBoxHandsOffFocus.Size = new System.Drawing.Size(692, 29);
+            this.checkBoxHandsOffFocus.TabIndex = 12;
+            this.checkBoxHandsOffFocus.Text = "I promise I\'ll keep my hands off the lens (this will speed up focusing)";
+            this.checkBoxHandsOffFocus.UseVisualStyleBackColor = true;
             // 
             // SetupDialogForm
             // 
@@ -679,5 +691,6 @@ namespace ASCOM.SonyMirrorless
         private System.Windows.Forms.ComboBox comboBoxLenses;
         private System.Windows.Forms.CheckBox checkBoxUsingCameraLens;
         private System.Windows.Forms.Button buttonFocusTools;
+        private System.Windows.Forms.CheckBox checkBoxHandsOffFocus;
     }
 }

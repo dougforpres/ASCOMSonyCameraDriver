@@ -29,6 +29,7 @@ namespace ASCOM.SonyMirrorless
         public bool ARWAutosaveAlwaysCreateEmptyFolder = false;
         public bool UsingCameraLens = false;
         public string LensId = "";
+        public bool HandsOffFocus = false;
 
         // Dynamic values
         public int ImageWidth = DefaultImageWidth; // Initialise variables to hold values required for functionality tested by Conform
@@ -90,6 +91,8 @@ namespace ASCOM.SonyMirrorless
         internal static string lensIdProfileDefault = "";
         internal static string usingCameraLensProfileName = "Using Camera Lens";
         internal static string usingCameraLensProfileDefault = "false";
+        internal static string handsOffProfileName = "Hands Off";
+        internal static string handsOffProfileDefault = "false";
 
         static public SonyCamera Camera
         {
@@ -199,6 +202,14 @@ namespace ASCOM.SonyMirrorless
 
                 Settings.UsingCameraLens = Convert.ToBoolean(driverProfile.GetValue(FocuserDriverId, usingCameraLensProfileName, string.Empty, usingCameraLensProfileDefault));
                 Settings.LensId = driverProfile.GetValue(FocuserDriverId, lensIdProfileName, string.Empty, lensIdProfileDefault);
+
+                if (Settings.LensId != String.Empty)
+                {
+                    // We need to also set the value into the registry
+                    String key = $"HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll\\Lenses\\{Settings.LensId}";
+
+                    Settings.HandsOffFocus = (int)Registry.GetValue(key, "Hands Off", 0) != 0 ? true : false;
+                }
             }
 
             Logger.Enabled = Settings.EnableLogging;
@@ -214,6 +225,9 @@ namespace ASCOM.SonyMirrorless
             Log($"Personality:                         {Settings.Personality}", "ReadProfile");
             Log($"Bulb Mode Enable:                    {Settings.BulbModeEnable}", "ReadProfile");
             Log($"Bulb Mode Time:                      {Settings.BulbModeTime}", "ReadProfile");
+            Log($"Using Camera Lens:                   {Settings.UsingCameraLens}", "ReadProfile");
+            Log($"FocuserDeviceID:                     {Settings.LensId}", "ReadProfile");
+            Log($"User promises to not touch lens:     {Settings.HandsOffFocus}", "ReadProfile");
 
             return true;
         }
@@ -250,6 +264,14 @@ namespace ASCOM.SonyMirrorless
                 driverProfile.DeviceType = "Focuser";
                 driverProfile.WriteValue(FocuserDriverId, lensIdProfileName, Settings.LensId);
                 driverProfile.WriteValue(FocuserDriverId, usingCameraLensProfileName, Settings.UsingCameraLens.ToString());
+
+                if (Settings.LensId != String.Empty)
+                {
+                    // We need to also set the value into the registry
+                    String key = $"HKEY_CURRENT_USER\\Software\\retro.kiwi\\SonyMTPCamera.dll\\Lenses\\{Settings.LensId}";
+
+                    Registry.SetValue(key, "Hands Off", Settings.HandsOffFocus ? 1 : 0);
+                }
             }
 
 

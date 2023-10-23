@@ -44,6 +44,7 @@ namespace ASCOM.SonyMirrorless
             DriverCommon.Settings.AllowISOAdjust = checkBoxAllowISOAdjust.Checked;
             DriverCommon.Settings.UsingCameraLens = checkBoxUsingCameraLens.Checked;
             DriverCommon.Settings.LensId = comboBoxLenses.SelectedItem != null ? ((Lens)comboBoxLenses.SelectedItem).Id : "";
+            DriverCommon.Settings.HandsOffFocus = checkBoxHandsOffFocus.Checked;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -107,6 +108,8 @@ namespace ASCOM.SonyMirrorless
             }
 
             buttonFocusTools.Enabled = DriverCommon.Settings.UsingCameraLens;
+            checkBoxHandsOffFocus.Checked = DriverCommon.Settings.HandsOffFocus;
+            checkBoxHandsOffFocus.Enabled = DriverCommon.Settings.UsingCameraLens;
 
             checkBoxEnableSaveLocation.Checked = DriverCommon.Settings.ARWAutosave;
             textBoxSaveLocation.Enabled = DriverCommon.Settings.ARWAutosave;
@@ -366,6 +369,7 @@ namespace ASCOM.SonyMirrorless
         private void checkBoxUsingCameraLens_CheckedChanged(object sender, EventArgs e)
         {
             comboBoxLenses.Enabled = checkBoxUsingCameraLens.Checked;
+            checkBoxHandsOffFocus.Enabled = checkBoxUsingCameraLens.Checked;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -378,23 +382,5 @@ namespace ASCOM.SonyMirrorless
 //                }
             }
         }
-
-        /*        private void tabControl1_Deselecting(object sender, TabControlCancelEventArgs e)
-                {
-                    if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
-                    {
-                        // Stop the timer
-                        timer1.Stop();
-                    }
-                }
-
-                private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
-                {
-                    if (tabControl1.SelectedTab == cameraInfoTab) // Index == 3)
-                    {
-                        // Stop the timer
-                        timer1.Start();
-                    }
-                }*/
     }
 }
