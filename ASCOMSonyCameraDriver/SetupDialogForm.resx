@@ -124,7 +124,7 @@
   <data name="modeWarning.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAU
-        2AAAFNgB1Vd0gAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAA6dEVYdFNvdXJj
+        1wAAFNcBo5namgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAA6dEVYdFNvdXJj
         ZQBUZWNobmlzY2hlIFJlZ2VsbiBm/HIgQXJiZWl0c3N05HR0ZW4gKERJTiBTdGFuZGFyZCm2hbPZAAAm
         kUlEQVR4Xu3dZ6AUVbIHcEkGRFbxXtynq2IERUAUBDEiZkBBxYSIWUAFVAQFVBRBRRTEAIqIBEEXE2bE
         gDnn1V2za05rXnfdffv6VV373u0+858+3TPVMx3qw++D5b19errPucxMna5ayXEcpVROwaBSKh9gUCmV
@@ -293,4 +293,7 @@
         BxhUSuUDDCql8gEGlVL5AINKqXyAQaVUPsCgUioPnJX+HwXJGv4/sFLVAAAAAElFTkSuQmCC
 </value>
   </data>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>76</value>
+  </metadata>
 </root>
